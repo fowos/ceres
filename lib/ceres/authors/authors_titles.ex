@@ -1,0 +1,22 @@
+defmodule Ceres.Authors.AuthorsTitles do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
+  schema "authors_titles" do
+    field :author_role, :integer
+    belongs_to :author, Ceres.Authors.Author, type: :binary_id
+    belongs_to :title, Ceres.Titles.Title, type: :binary_id
+
+    timestamps(type: :utc_datetime)
+  end
+
+  @doc false
+  def changeset(authors_titles, attrs) do
+    authors_titles
+    |> cast(attrs, [:author_role, :author_id, :title_id])
+    |> validate_required([:author_role, :author_id, :title_id])
+    |> unique_constraint(:author_title, name: :authors_titles_author_id_title_id_index)
+  end
+end

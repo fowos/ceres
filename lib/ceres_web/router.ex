@@ -54,7 +54,10 @@ scope "/", CeresWeb do
       on_mount: [{CeresWeb.UserAuth, :require_authenticated}] do
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
-      live "/upload", Uploader.UploadLive, :index
+
+      live "/titles", TitlesList.TitlesListLive, :index
+      live "/titles/new", TitlesList.Form, :new
+      live "/titles/:id/edit", TitlesList.Form, :edit
     end
 
     post "/users/update-password", UserSessionController, :update_password

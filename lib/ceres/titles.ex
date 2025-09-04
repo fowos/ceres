@@ -7,41 +7,18 @@ defmodule Ceres.Titles do
   alias Ceres.Repo
 
   alias Ceres.Titles.Title
-  alias Ceres.Accounts.Scope
-
-  @doc """
-  Subscribes to scoped notifications about any title changes.
-
-  The broadcasted messages match the pattern:
-
-    * {:created, %Title{}}
-    * {:updated, %Title{}}
-    * {:deleted, %Title{}}
-
-  """
-  def subscribe_titles(%Scope{} = scope) do
-    key = scope.user.id
-
-    Phoenix.PubSub.subscribe(Ceres.PubSub, "user:#{key}:titles")
-  end
-
-  defp broadcast_title(%Scope{} = scope, message) do
-    key = scope.user.id
-
-    Phoenix.PubSub.broadcast(Ceres.PubSub, "user:#{key}:titles", message)
-  end
 
   @doc """
   Returns the list of titles.
 
   ## Examples
 
-      iex> list_titles(scope)
+      iex> list_titles()
       [%Title{}, ...]
 
   """
-  def list_titles(%Scope{} = scope) do
-    Repo.all_by(Title, user_id: scope.user.id)
+  def list_titles() do
+    Repo.all(Title)
   end
 
   @doc """
@@ -51,15 +28,15 @@ defmodule Ceres.Titles do
 
   ## Examples
 
-      iex> get_title!(scope, 123)
+      iex> get_title!(123)
       %Title{}
 
-      iex> get_title!(scope, 456)
+      iex> get_title!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_title!(%Scope{} = scope, id) do
-    Repo.get_by!(Title, id: id, user_id: scope.user.id)
+  def get_title!(id) do
+    Repo.get_by!(Title, id: id)
   end
 
   @doc """
@@ -67,21 +44,17 @@ defmodule Ceres.Titles do
 
   ## Examples
 
-      iex> create_title(scope, %{field: value})
+      iex> create_title(%{field: value})
       {:ok, %Title{}}
 
-      iex> create_title(scope, %{field: bad_value})
+      iex> create_title(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_title(%Scope{} = scope, attrs) do
-    with {:ok, title = %Title{}} <-
-           %Title{}
-           |> Title.changeset(attrs, scope)
-           |> Repo.insert() do
-      broadcast_title(scope, {:created, title})
-      {:ok, title}
-    end
+  def create_title(attrs) do
+    %Title{}
+    |> Title.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -89,23 +62,17 @@ defmodule Ceres.Titles do
 
   ## Examples
 
-      iex> update_title(scope, title, %{field: new_value})
+      iex> update_title(title, %{field: new_value})
       {:ok, %Title{}}
 
-      iex> update_title(scope, title, %{field: bad_value})
+      iex> update_title(title, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_title(%Scope{} = scope, %Title{} = title, attrs) do
-    true = title.user_id == scope.user.id
-
-    with {:ok, title = %Title{}} <-
-           title
-           |> Title.changeset(attrs, scope)
-           |> Repo.update() do
-      broadcast_title(scope, {:updated, title})
-      {:ok, title}
-    end
+  def update_title(%Title{} = title, attrs) do
+    title
+      |> Title.changeset(attrs)
+      |> Repo.update()
   end
 
   @doc """
@@ -113,21 +80,15 @@ defmodule Ceres.Titles do
 
   ## Examples
 
-      iex> delete_title(scope, title)
+      iex> delete_title(title)
       {:ok, %Title{}}
 
-      iex> delete_title(scope, title)
+      iex> delete_title(title)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_title(%Scope{} = scope, %Title{} = title) do
-    true = title.user_id == scope.user.id
-
-    with {:ok, title = %Title{}} <-
-           Repo.delete(title) do
-      broadcast_title(scope, {:deleted, title})
-      {:ok, title}
-    end
+  def delete_title(%Title{} = title) do
+    Repo.delete(title)
   end
 
   @doc """
@@ -135,14 +96,12 @@ defmodule Ceres.Titles do
 
   ## Examples
 
-      iex> change_title(scope, title)
+      iex> change_title(title)
       %Ecto.Changeset{data: %Title{}}
 
   """
-  def change_title(%Scope{} = scope, %Title{} = title, attrs \\ %{}) do
-    true = title.user_id == scope.user.id
-
-    Title.changeset(title, attrs, scope)
+  def change_title(%Title{} = title, attrs \\ %{}) do
+    Title.changeset(title, attrs)
   end
 
   alias Ceres.Titles.Comic

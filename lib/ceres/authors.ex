@@ -389,4 +389,32 @@ defmodule Ceres.Authors do
   def change_publishers_titles(%PublishersTitles{} = publishers_titles, attrs \\ %{}) do
     PublishersTitles.changeset(publishers_titles, attrs)
   end
+
+    @doc """
+  Gets the author associated with a given title ID.
+
+  ## Examples
+
+      iex> get_author_by_title_id(123)
+      %Author{}
+
+      iex> get_author_by_title_id(456)
+      nil
+
+  """
+  def get_author_by_title_id(title_id) do
+    Repo.get_by(AuthorsTitles, title_id: title_id)
+    |> Repo.preload(:author)
+    |> Map.get(:author)
+  end
+
+  @doc """
+  Gets authors whose names match the given name (case-insensitive).
+
+  """
+  def get_authors_by_name(name) do
+    query = from a in Author,
+            where: ilike(a.name, ^"%#{name}%")
+    Repo.all(query)
+  end
 end

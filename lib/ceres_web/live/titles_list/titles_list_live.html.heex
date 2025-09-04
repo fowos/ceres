@@ -1,0 +1,32 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+
+  <.header>
+    Titles list page
+    <:subtitle>
+      You will can sort titles...
+    </:subtitle>
+
+      <:actions>
+        <.button class="btn btn-primary rounded-lg" navigate={~p"/titles/new"} value="true">
+          Create <.icon name="hero-document-plus" class="size-5" />
+        </.button>
+      </:actions>
+  </.header>
+
+
+  <.table
+    id="titles"
+    rows={@streams.titles}
+    class="table table-zerba w-full"
+  >
+    <:col :let={{_id, title}} label="Original name">{title.original_name}</:col>
+    <:col :let={{_id, title}} label="Type">{title.type}</:col>
+    <:action :let={{_id, title}}>
+      <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/titles/#{title}/edit"}>Edit</.button>
+
+    </:action>
+  </.table>
+
+
+
+</Layouts.app>

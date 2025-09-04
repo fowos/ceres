@@ -46,11 +46,11 @@ defmodule CeresWeb.Layouts do
       </div>
     </header>
 
-    <main class="flex gap-4 flex-col md:flex-row mx-auto px-4 py-4 md:py-20 sm:px-6 lg:px-6">
+    <main class="flex gap-4 flex-col md:flex-row mx-auto px-4 sm:px-6 lg:px-6">
       <div class="flex w-auto">
         <.navbar current_scope={@current_scope} />
       </div>
-      <div class="mx-auto w-full space-y-4">
+      <div class="mx-auto w-full space-y-4 w-full bg-base-200 p-4 rounded-lg border-1 border-base-300">
         {render_slot(@inner_block)}
       </div>
     </main>

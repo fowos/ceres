@@ -1,26 +1,31 @@
 <Layouts.app flash={@flash}>
-  <div class="flex flex-col lg:flex-row">
-    <div class="w-full lg:p-4">
-      <.header>
-        Edit title params
-      </.header>
 
-      <.form for={@form} id="title-form" phx-change="validate" phx-submit="save">
-        <.input field={@form[:original_name]} type="textarea" label="Original name"/>
-        <.input field={@form[:type]} type="select" label="Type" options={@type_options}/>
+  <div class="w-full flex flex-col gap-4  bg-base-200 rounded-lg mb-4">
+    <div class="flex flex-col gap-4 lg:gap-8 max-w-5xl mx-auto w-full">
+      <div class="lg:p-4 w-full">
+        <.header>
+          Edit title params
+        </.header>
 
-        <footer>
-          <.button phx-disable-with="Saving..." variant="primary">Save Title</.button>
-          <.button navigate={return_path(@return_to, @title)}>Cancel</.button>
-        </footer>
-      </.form>
-    </div>
+        <.form for={@form} id="title-form" phx-change="validate" phx-submit="save">
+          <.input field={@form[:original_name]} phx-debounce="400"  type="textarea" label="Original name"/>
+          <.input field={@form[:type]} type="select" label="Type" options={@type_options}/>
 
-    <div class="divider lg:divider-horizontal"></div>
+          <footer>
+            <.button phx-disable-with="Saving..." variant="primary">Save Title</.button>
+            <.button navigate={return_path(@return_to, @title)}>Cancel</.button>
+          </footer>
+        </.form>
+      </div>
 
-    <div class="w-full lg:p-4">
+      <div class="w-full lg:p-4" >
+        <.live_component module={CeresWeb.TitlesList.Components.FormTags} id="form-tags" tags={@tags}/>
+      </div>
 
-      <.live_component module={CeresWeb.TitlesList.FormAuthor} id="form-author" authors={@authors}/>
+      <div class="w-full lg:p-4">
+        <.live_component module={CeresWeb.TitlesList.Components.FormAuthor} id="form-author" authors={@authors}/>
+      </div>
+
     </div>
   </div>
 </Layouts.app>

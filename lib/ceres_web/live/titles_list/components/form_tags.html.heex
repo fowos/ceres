@@ -1,0 +1,59 @@
+<div>
+
+  <.header>
+    Title tags
+  </.header>
+
+  <div>
+    <ul class="flex flex-wrap gap-2">
+      <%= for tag <- @tags do %>
+        <li class="inline-block bg-base-100 text-base-content rounded-lg px-2 py-1 text-sm font-semibold">
+          <%= tag.name %>
+          <.button
+            phx-click="remove-tag"
+            phx-value-id={tag.id}
+            phx-target={@myself}
+            class="text-error hover:text-warning"
+          >
+            <.icon name="hero-x-mark" class="w-5 h-5"/>
+          </.button>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="relative w-full mt-4">
+    <.form phx-submit="save-tag" phx-target={@myself}>
+      <.input
+        type="text"
+        id="tag-search"
+        name="search"
+        label="Select tags"
+        placeholder="Enter tag name"
+        phx-debounce="200"
+        phx-change="search"
+        phx-target={@myself}
+        autocomplete="off"
+        value={@search}
+      />
+    </.form>
+
+    <div class="absolute left-0 top-full w-full z-50">
+      <%= if @results != [] do %>
+        <div class="absolute left-0 bg-base-300 top-full w-full z-50 rounded-md border border-base-100 shadow-lg">
+          <.table
+            id="results-table"
+            rows={@results}
+            row_id={fn row -> "tag-#{row.id}" end}
+            row_click={fn row -> JS.push("add-tag", value: %{id: row.id}, target: @myself) end}
+            class=""
+          >
+            <:col :let={tag} label="Name">{tag.name}</:col>
+
+          </.table>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+</div>

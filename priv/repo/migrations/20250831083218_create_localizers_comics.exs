@@ -4,8 +4,8 @@ defmodule Ceres.Repo.Migrations.CreateLocalizersComics do
   def change do
     create table(:localizers_comics, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :comic_id, references(:comics, on_delete: :nothing, type: :binary_id)
-      add :localizer_id, references(:localizers, on_delete: :nothing, type: :binary_id)
+      add :comic_id, references(:comics, on_delete: :nothing, type: :binary_id), null: false
+      add :localizer_id, references(:localizers, on_delete: :nothing, type: :binary_id), null: false
 
       timestamps(type: :utc_datetime)
     end

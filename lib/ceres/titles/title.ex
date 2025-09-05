@@ -16,6 +16,8 @@ defmodule Ceres.Titles.Title do
     has_many :publishers_titles, Ceres.Authors.PublishersTitles
     has_many :publishers, through: [:publishers_titles, :publisher]
 
+    many_to_many :tags, Ceres.Tags.Tag, join_through: Ceres.Tags.TitlesTags
+
 
     timestamps(type: :utc_datetime)
   end

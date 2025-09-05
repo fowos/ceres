@@ -1,5 +1,8 @@
 defmodule CeresWeb.TitlesList.Form do
   require Ecto.Query
+  alias Ceres.Tags.TitlesTags
+  alias Ceres.Tags.Tag
+  alias Ceres.Tags
   alias Ceres.Authors.Author
   alias Ceres.Authors
   use CeresWeb, :live_view
@@ -32,21 +35,26 @@ defmodule CeresWeb.TitlesList.Form do
     |> assign(:title, title)
     |> assign(:form, to_form(Titles.change_title(title)))
     |> assign(:authors, [])
+    |> assign(:tags, [])
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
     title = Titles.get_title!(id)
+
+    tags = title |> Repo.preload(:tags) |> Map.get(:tags)
 
     authors = title
     |> Repo.preload(:authors_titles)
     |> Map.get(:authors_titles)
     |> Enum.map(fn at -> {Repo.preload(at, :author).author, at.author_role} end)
 
+
     socket
     |> assign(:page_title, "Edit Title")
     |> assign(:title, title)
     |> assign(:form, to_form(Titles.change_title(title)))
     |> assign(:authors, authors)
+    |> assign(:tags, tags)
 
   end
 
@@ -103,8 +111,7 @@ defmodule CeresWeb.TitlesList.Form do
   defp return_path("show", title), do: ~p"/titles/#{title}"
 
   def handle_info({:add_author, author, role}, socket) do
-
-    if author.id in Enum.map(socket.assigns.authors, fn {a, _r} -> a.id end) do
+    if Enum.any?(socket.assigns.authors, fn {a, _r} -> a.id == author.id end) do
       {:noreply, socket |> put_flash(:error, "Author already added")}
     else
       authors = socket.assigns.authors ++ [{author, role_to_atom(role)}]
@@ -152,6 +159,52 @@ defmodule CeresWeb.TitlesList.Form do
   end
 
   defp find_author(authors, id), do: Enum.find(authors, fn {a, _r} -> a.id == id end)
+
+  @impl true
+  def handle_info({:flash, kind, msg}, socket) do
+    {:noreply, socket |> put_flash(kind, msg)}
+  end
+
+  @impl true
+  def handle_info({:add_tag, tag}, socket) do
+    IO.inspect(socket.assigns.title, label: "assigns")
+
+    if Enum.any?(socket.assigns.tags, fn el -> el.id == tag.id end) do
+      {:noreply, socket |> put_flash(:error, "Already used tag")}
+    else
+      tags = socket.assigns.tags ++ [tag]
+      |> Enum.uniq_by(fn tag -> tag.id end)
+
+      case socket.assigns.live_action do
+        :new -> {:noreply, socket |> assign(:tags, tags)}
+        :edit ->
+          case Tags.create_titles_tags(%{
+            title_id: socket.assigns.title.id,
+            tag_id: tag.id
+          }) do
+            {:ok, tag} -> {:noreply, socket |> assign(:tags, tags)}
+            {:error, changeset} ->
+              Logger.error("Error while connecting tag with title. \n #{inspect(changeset)}")
+              {:noreply, socket |> put_flash(:error, "Error while connecting tag with title, please check server logs")}
+          end
+      end
+    end
+  end
+
+  @impl true
+  def handle_info({:remove_tag, tag}, socket) do
+    with true <- Enum.any?(socket.assigns.tags, fn el -> el.id == tag.id end),
+        %TitlesTags{} = titles_tags <- Tags.get_titles_tags_by_ids(socket.assigns.title.id, tag.id),
+        {:ok, _some} <- Tags.delete_titles_tags(titles_tags)
+    do
+      tags = socket.assigns.tags |> Enum.reject(fn el -> el.id == tag.id end)
+      {:noreply, socket |> assign(:tags, tags)}
+    else
+      error ->
+        Logger.error("Some error while deleting TitlesTags relation. \n #{inspect(error)}")
+        {:noreply, socket}
+    end
+  end
 
 
   defp role_to_atom("art"), do: :art

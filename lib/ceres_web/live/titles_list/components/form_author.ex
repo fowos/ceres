@@ -1,4 +1,4 @@
-defmodule CeresWeb.TitlesList.FormAuthor do
+defmodule CeresWeb.TitlesList.Components.FormAuthor do
   use Phoenix.LiveComponent
   alias Ceres.Authors.Author
   use CeresWeb, :html
@@ -14,7 +14,6 @@ defmodule CeresWeb.TitlesList.FormAuthor do
     |> assign(:changeset, Authors.change_author(%Author{}) |> to_form())
     |> assign(:search, nil)
     |> assign(:type_options, [{"Art", :art}, {"Story", :story}, {"Story & Art", :story_art}])
-
 
     {:ok, socket}
   end

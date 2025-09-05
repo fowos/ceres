@@ -4,8 +4,8 @@ defmodule Ceres.Repo.Migrations.CreatePublishersTitles do
   def change do
     create table(:publishers_titles, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :publisher_id, references(:publishers, on_delete: :delete_all, type: :binary_id)
-      add :title_id, references(:titles, on_delete: :delete_all, type: :binary_id)
+      add :publisher_id, references(:publishers, on_delete: :delete_all, type: :binary_id), null: false
+      add :title_id, references(:titles, on_delete: :delete_all, type: :binary_id), null: false
 
       timestamps(type: :utc_datetime)
     end

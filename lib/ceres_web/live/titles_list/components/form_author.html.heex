@@ -3,12 +3,6 @@
     Select authors
   </.header>
 
-    <%!-- <.header>
-      <:subtitle>
-        Select authors from the list or create a new one.
-      </:subtitle>
-    </.header> --%>
-
   <div class="mx-auto">
     <div class="relative w-full">
       <.table
@@ -86,40 +80,42 @@
 
     <div class="divider">or</div>
 
-    <.form
-      for={@changeset}
-      phx-submit="save"
-      phx-change="validate"
-      phx-target={@myself}
-      class="w-full"
-    >
-      <.header>
-        Create a new author
-      </.header>
+    <div class="w-full">
+      <.form
+        for={@changeset}
+        phx-submit="save"
+        phx-change="validate"
+        phx-target={@myself}
+        class="w-full"
+      >
+        <.header>
+          Create a new author
+        </.header>
 
-      <.input
-        type="text"
-        field={@changeset[:name]}
-        phx-debounce="400"
-        label="Name"
-        placeholder="Enter author name"
-        autocomplete="off"
-      />
-      <.input
-        type="textarea"
-        field={@changeset[:description]}
-        phx-debounce="400"
-        label="Description"
-        placeholder="Enter author description"
-        autocomplete="off"
-      />
+        <.input
+          type="text"
+          field={@changeset[:name]}
+          phx-debounce="400"
+          label="Name"
+          placeholder="Enter author name"
+          autocomplete="off"
+        />
+        <.input
+          type="textarea"
+          field={@changeset[:description]}
+          phx-debounce="400"
+          label="Description"
+          placeholder="Enter author description"
+          autocomplete="off"
+        />
 
-      <.input phx-target={@myself} field={@changeset[:author_role]} type="select" label="Role" options={@type_options}/>
+        <.input phx-target={@myself} field={@changeset[:author_role]} type="select" label="Role" options={@type_options}/>
 
-      <footer class="flex justify-between gap-8">
-        <.button phx-target={@myself} phx-disable-with="Saving..." variant="primary" type="submit">Add</.button>
-        <.button phx-target={@myself} type="button" phx-click="clear-form" class="btn bg-warning font-light">Clear</.button>
-      </footer>
-    </.form>
+        <footer class="flex justify-start gap-4">
+          <.button phx-target={@myself} phx-disable-with="Saving..." variant="primary" type="submit">Add</.button>
+          <.button phx-target={@myself} type="button" phx-click="clear-form" class="btn bg-warning">Clear</.button>
+        </footer>
+      </.form>
+    </div>
   </div>
 </div>

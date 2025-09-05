@@ -17,5 +17,6 @@ defmodule Ceres.Titles.Page do
     page
     |> cast(attrs, [:number, :source, :chapter_id])
     |> validate_required([:number, :source, :chapter_id])
+    |> unique_constraint(:number, name: :unique_chapter_page_number)
   end
 end

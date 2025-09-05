@@ -14,5 +14,6 @@ defmodule Ceres.Repo.Migrations.CreateChapters do
     create index(:chapters, [:comic_id])
     create index(:chapters, [:volume])
     create index(:chapters, [:number])
+    create unique_index(:chapters, [:comic_id, :volume, :number], name: :unique_comic_volume_number)
   end
 end

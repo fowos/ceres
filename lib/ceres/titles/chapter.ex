@@ -19,5 +19,6 @@ defmodule Ceres.Titles.Chapter do
     chapter
     |> cast(attrs, [:volume, :number, :comic_id])
     |> validate_required([:volume, :number, :comic_id])
+    |> unique_constraint(:number, name: :unique_comic_volume_number)
   end
 end

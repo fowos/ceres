@@ -6,7 +6,7 @@ defmodule Ceres.Repo.Migrations.CreateAuthorsTitles do
       add :id, :binary_id, primary_key: true
       add :author_role, :integer, null: false
       add :author_id, references(:authors, on_delete: :delete_all, type: :binary_id)
-      add :title_id, references(:authors, on_delete: :delete_all, type: :binary_id)
+      add :title_id, references(:titles, on_delete: :delete_all, type: :binary_id)
 
       timestamps(type: :utc_datetime)
     end

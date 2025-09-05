@@ -281,6 +281,11 @@ defmodule Ceres.Authors do
     Repo.delete(authors_titles)
   end
 
+  def delete_authors_titles_by_title_id(title_id, author_id) do
+    from(at in AuthorsTitles, where: at.title_id == ^title_id and at.author_id == ^author_id)
+    |> Repo.delete_all()
+  end
+
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking authors_titles changes.
 

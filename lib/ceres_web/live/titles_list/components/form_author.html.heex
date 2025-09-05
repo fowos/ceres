@@ -1,0 +1,125 @@
+<div>
+  <.header>
+    Select authors
+  </.header>
+
+    <%!-- <.header>
+      <:subtitle>
+        Select authors from the list or create a new one.
+      </:subtitle>
+    </.header> --%>
+
+  <div class="mx-auto">
+    <div class="relative w-full">
+      <.table
+        :if={@authors != []}
+        id="authors-table"
+        rows={@authors}
+      >
+        <:col :let={{author, _role}} label="Name">{author.name}</:col>
+        <:col :let={{_author, role}} label="Role">{role}</:col>
+
+        <:action :let={{author, role}}>
+          <.button
+            phx-click="remove-author" phx-target={@myself} phx-value-id={author.id}
+            class="cursor-pointer text-error"
+          >
+            <.icon name="hero-trash" class="h-5 w-5 hover:text-error-content duration-300"/>
+          </.button>
+        </:action>
+      </.table>
+
+      <.form onsubmit="return false;">
+        <.input
+        type="text"
+        id="search"
+        name="search"
+        label="Select authors"
+        placeholder="Enter author name"
+        phx-debounce="400"
+        phx-change="search"
+        phx-target={@myself}
+        autocomplete="off"
+        value={@search}
+      />
+
+      </.form>
+
+      <div class="absolute left-0 top-full w-full z-50">
+        <%= if @results != [] do %>
+          <div class="absolute left-0 bg-base-300 top-full w-full z-50 rounded-md border border-base-100 shadow-lg">
+            <.table
+              id="results-table"
+              rows={@results}
+              class=""
+            >
+              <:col :let={author} label="Name">{author.name}</:col>
+
+              <:action :let={author}>
+                <.button
+                  phx-click="select" phx-target={@myself} phx-value-id={author.id} phx-value-role="art"
+                  class="whitespace-nowrap hover:text-primary cursor-pointer"
+                >
+                  Art
+                </.button>
+
+                <.button
+                  phx-click="select" phx-target={@myself} phx-value-id={author.id} phx-value-role="story"
+                  class="whitespace-nowrap hover:text-primary cursor-pointer"
+                >
+                  Story
+                </.button>
+
+                <.button
+                  phx-click="select" phx-target={@myself} phx-value-id={author.id} phx-value-role="story_art"
+                  class="whitespace-nowrap hover:text-primary cursor-pointer"
+                >
+                  Story & Art
+                </.button>
+              </:action>
+            </.table>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
+
+    <div class="divider">or</div>
+
+    <.form
+      for={@changeset}
+      phx-submit="save"
+      phx-change="validate"
+      phx-target={@myself}
+      class="w-full"
+    >
+      <.header>
+        Create a new author
+      </.header>
+
+      <.input
+        type="text"
+        field={@changeset[:name]}
+        phx-debounce="400"
+        label="Name"
+        placeholder="Enter author name"
+        autocomplete="off"
+      />
+      <.input
+        type="textarea"
+        field={@changeset[:description]}
+        phx-debounce="400"
+        label="Description"
+        placeholder="Enter author description"
+        autocomplete="off"
+      />
+
+      <.input phx-target={@myself} field={@changeset[:author_role]} type="select" label="Role" options={@type_options}/>
+
+      <footer class="flex justify-between gap-8">
+        <.button phx-target={@myself} phx-disable-with="Saving..." variant="primary" type="submit">Add</.button>
+        <.button phx-target={@myself} type="button" phx-click="clear-form" class="btn bg-warning font-light">Clear</.button>
+      </footer>
+    </.form>
+  </div>
+</div>

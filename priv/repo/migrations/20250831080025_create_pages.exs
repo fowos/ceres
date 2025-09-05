@@ -12,5 +12,7 @@ defmodule Ceres.Repo.Migrations.CreatePages do
     end
 
     create index(:pages, [:chapter_id])
+    create index(:pages, [:number])
+    create unique_index(:pages, [:chapter_id, :number], name: :unique_chapter_page_number)
   end
 end

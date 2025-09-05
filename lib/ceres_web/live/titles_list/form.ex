@@ -8,6 +8,8 @@ defmodule CeresWeb.TitlesList.Form do
   alias Ceres.Titles.Title
   alias Ceres.Repo
 
+  require Logger
+
 
   @impl true
   def mount(params, _session, socket) do
@@ -35,7 +37,10 @@ defmodule CeresWeb.TitlesList.Form do
   defp apply_action(socket, :edit, %{"id" => id}) do
     title = Titles.get_title!(id)
 
-    authors = title |> Repo.preload(:authors) |> Map.get(:authors)
+    authors = title
+    |> Repo.preload(:authors_titles)
+    |> Map.get(:authors_titles)
+    |> Enum.map(fn at -> {Repo.preload(at, :author).author, at.author_role} end)
 
     socket
     |> assign(:page_title, "Edit Title")
@@ -60,17 +65,7 @@ defmodule CeresWeb.TitlesList.Form do
     save_title(socket, socket.assigns.live_action, title_params)
   end
 
-
-  def handle_event("toggle_new_author", _params, socket) do
-    {:noreply, update(socket, :show_new_author, fn show -> !show end)}
-  end
-
-
   def save_title(socket, :edit, title_params) do
-    IO.inspect(socket.assigns.live_action, label: "Live action")
-    IO.inspect(title_params, label: "Title params")
-    IO.inspect(socket.assigns.title, label: "Socket title")
-
     case Titles.update_title(socket.assigns.title, title_params) do
       {:ok, title} ->
         {:noreply,
@@ -86,6 +81,14 @@ defmodule CeresWeb.TitlesList.Form do
   def save_title(socket, :new, title_params) do
     case Titles.create_title(title_params) do
       {:ok, title} ->
+        Enum.each(socket.assigns.authors, fn {author, role} ->
+          Authors.create_authors_titles(%{
+            author_id: author.id,
+            title_id: title.id,
+            author_role: role_to_atom(role)
+          })
+        end)
+
         {:noreply,
          socket
          |> put_flash(:info, "Title created successfully")
@@ -98,4 +101,65 @@ defmodule CeresWeb.TitlesList.Form do
 
   defp return_path("index", _mitle), do: ~p"/titles"
   defp return_path("show", title), do: ~p"/titles/#{title}"
+
+  def handle_info({:add_author, author, role}, socket) do
+
+    if author.id in Enum.map(socket.assigns.authors, fn {a, _r} -> a.id end) do
+      {:noreply, socket |> put_flash(:error, "Author already added")}
+    else
+      authors = socket.assigns.authors ++ [{author, role_to_atom(role)}]
+      |> Enum.uniq_by(fn {a, _r} -> a.id end)
+
+      case socket.assigns.live_action do
+        :new -> {:noreply, assign(socket, :authors, authors)}
+        :edit ->
+          Authors.create_authors_titles(%{
+            author_id: author.id,
+            title_id: socket.assigns.title.id,
+            author_role: role_to_atom(role)
+          })
+
+          socket = socket
+          |> put_flash(:info, "Author added successfully")
+          |> assign(:authors, authors)
+
+          {:noreply, socket}
+      end
+    end
+  end
+
+  def handle_info({:remove_author, author_id}, socket) do
+    authors = socket.assigns.authors
+
+    with {%Author{} = author, _role} <- find_author(authors, author_id) do
+
+      if socket.assigns.live_action == :edit do
+        Authors.delete_authors_titles_by_title_id(socket.assigns.title.id, author.id)
+      end
+
+      authors = Enum.reject(authors, fn {a, _r} -> a.id == author_id end)
+
+      socket = socket
+      |> put_flash(:info, "Author '#{author.name}' removed successfully")
+      |> assign(:authors, authors)
+
+      {:noreply, socket}
+    else
+      _ ->
+        Logger.error("Author with id #{author_id} not found in title #{socket.assigns.title.id}")
+        {:noreply, socket |> put_flash(:error, "Author not found in title")}
+    end
+  end
+
+  defp find_author(authors, id), do: Enum.find(authors, fn {a, _r} -> a.id == id end)
+
+
+  defp role_to_atom("art"), do: :art
+  defp role_to_atom("story"), do: :story
+  defp role_to_atom("story_art"), do: :story_art
+  defp role_to_atom(role) when is_atom(role), do: role
+  defp role_to_atom(role) do
+    Logger.error("Unknown author role, #{role}")
+    raise ArgumentError, "Unknown author role, '#{inspect(role)}'"
+  end
 end

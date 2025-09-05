@@ -20,7 +20,7 @@ defmodule CeresWeb.TitlesList.Components.FormAuthor do
 
 
   @impl true
-  def handle_event("search", %{"search" => search} = params, socket) do
+  def handle_event("search", %{"search" => search}, socket) do
     if search == "" || search == nil do
       socket = socket
       |> assign(:results, [])
@@ -35,7 +35,7 @@ defmodule CeresWeb.TitlesList.Components.FormAuthor do
   end
 
   @impl true
-  def handle_event("select", %{"id" => author_id, "role" => role} = params, socket) do
+  def handle_event("select", %{"id" => author_id, "role" => role}, socket) do
     send(self(), {:add_author, Authors.get_author!(author_id), role})
 
     socket = socket
@@ -46,7 +46,7 @@ defmodule CeresWeb.TitlesList.Components.FormAuthor do
   end
 
   @impl true
-  def handle_event("validate", %{"author" => author} = params, socket) do
+  def handle_event("validate", %{"author" => author}, socket) do
     changeset =
       Authors.change_author(%Author{}, author)
       |> Map.put(:action, :validate)
@@ -57,7 +57,7 @@ defmodule CeresWeb.TitlesList.Components.FormAuthor do
   end
 
   @impl true
-  def handle_event("save", %{"author" => author_attrs} = params, socket) do
+  def handle_event("save", %{"author" => author_attrs}, socket) do
 
     case Authors.create_author(author_attrs) do
       {:ok, author} ->

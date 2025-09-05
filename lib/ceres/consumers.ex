@@ -7,29 +7,7 @@ defmodule Ceres.Consumers do
   alias Ceres.Repo
 
   alias Ceres.Consumers.Consumer
-  alias Ceres.Accounts.Scope
 
-  @doc """
-  Subscribes to scoped notifications about any consumer changes.
-
-  The broadcasted messages match the pattern:
-
-    * {:created, %Consumer{}}
-    * {:updated, %Consumer{}}
-    * {:deleted, %Consumer{}}
-
-  """
-  def subscribe_consumers(%Scope{} = scope) do
-    key = scope.user.id
-
-    Phoenix.PubSub.subscribe(Ceres.PubSub, "user:#{key}:consumers")
-  end
-
-  defp broadcast_consumer(%Scope{} = scope, message) do
-    key = scope.user.id
-
-    Phoenix.PubSub.broadcast(Ceres.PubSub, "user:#{key}:consumers", message)
-  end
 
   @doc """
   Returns the list of consumers.
@@ -40,8 +18,8 @@ defmodule Ceres.Consumers do
       [%Consumer{}, ...]
 
   """
-  def list_consumers(%Scope{} = scope) do
-    Repo.all_by(Consumer, user_id: scope.user.id)
+  def list_consumers() do
+    Repo.all_by(Consumer)
   end
 
   @doc """
@@ -58,8 +36,8 @@ defmodule Ceres.Consumers do
       ** (Ecto.NoResultsError)
 
   """
-  def get_consumer!(%Scope{} = scope, id) do
-    Repo.get_by!(Consumer, id: id, user_id: scope.user.id)
+  def get_consumer!(id) do
+    Repo.get_by!(Consumer, id: id)
   end
 
   @doc """
@@ -74,12 +52,11 @@ defmodule Ceres.Consumers do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_consumer(%Scope{} = scope, attrs) do
+  def create_consumer(attrs) do
     with {:ok, consumer = %Consumer{}} <-
            %Consumer{}
-           |> Consumer.changeset(attrs, scope)
+           |> Consumer.changeset(attrs)
            |> Repo.insert() do
-      broadcast_consumer(scope, {:created, consumer})
       {:ok, consumer}
     end
   end
@@ -96,14 +73,11 @@ defmodule Ceres.Consumers do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_consumer(%Scope{} = scope, %Consumer{} = consumer, attrs) do
-    true = consumer.user_id == scope.user.id
-
+  def update_consumer(%Consumer{} = consumer, attrs) do
     with {:ok, consumer = %Consumer{}} <-
            consumer
-           |> Consumer.changeset(attrs, scope)
+           |> Consumer.changeset(attrs)
            |> Repo.update() do
-      broadcast_consumer(scope, {:updated, consumer})
       {:ok, consumer}
     end
   end
@@ -120,12 +94,9 @@ defmodule Ceres.Consumers do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_consumer(%Scope{} = scope, %Consumer{} = consumer) do
-    true = consumer.user_id == scope.user.id
-
+  def delete_consumer(%Consumer{} = consumer) do
     with {:ok, consumer = %Consumer{}} <-
            Repo.delete(consumer) do
-      broadcast_consumer(scope, {:deleted, consumer})
       {:ok, consumer}
     end
   end
@@ -139,10 +110,8 @@ defmodule Ceres.Consumers do
       %Ecto.Changeset{data: %Consumer{}}
 
   """
-  def change_consumer(%Scope{} = scope, %Consumer{} = consumer, attrs \\ %{}) do
-    true = consumer.user_id == scope.user.id
-
-    Consumer.changeset(consumer, attrs, scope)
+  def change_consumer(%Consumer{} = consumer, attrs \\ %{}) do
+    Consumer.changeset(consumer, attrs)
   end
 
   alias Ceres.Consumers.Comment

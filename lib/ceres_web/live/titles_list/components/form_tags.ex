@@ -32,7 +32,7 @@ defmodule CeresWeb.TitlesList.Components.FormTags do
   end
 
   @impl true
-  def handle_event("save-tag", %{"search" => new} = params, socket) do
+  def handle_event("save-tag", %{"search" => new}, socket) do
     socket = socket |> assign(:results, [])
     case new do
       "" -> {:noreply, socket |> assign(:results, [])}
@@ -61,20 +61,19 @@ defmodule CeresWeb.TitlesList.Components.FormTags do
   end
 
   @impl true
-  def handle_event("remove-tag", %{"id" => id} = params, socket) do
+  def handle_event("remove-tag", %{"id" => id}, socket) do
     send(self(), {:remove_tag, Tags.get_tag!(id)})
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("add-tag", %{"id" => id}, socket) do
-    exist = Enum.any?(socket.assigns.tags, fn tag -> tag.id == id end)
-
-    case exist do
-      true -> {:noreply, socket}
-      false ->
-        tag = Tags.get_tag!(id)
-        send(self(), {:add_tag, tag})
+    if not Enum.any?(socket.assigns.tags, fn tag -> tag.id == id end) do
+      tag = Tags.get_tag!(id)
+      Logger.debug("sent")
+      send(self(), {:add_tag, tag})
     end
+
+    {:noreply, socket}
   end
 end

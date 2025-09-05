@@ -13,7 +13,7 @@
         <:col :let={{author, _role}} label="Name">{author.name}</:col>
         <:col :let={{_author, role}} label="Role">{role}</:col>
 
-        <:action :let={{author, role}}>
+        <:action :let={{author, _role}}>
           <.button
             phx-click="remove-author" phx-target={@myself} phx-value-id={author.id}
             class="cursor-pointer text-error"
@@ -45,7 +45,6 @@
             <.table
               id="results-table"
               rows={@results}
-              class=""
             >
               <:col :let={author} label="Name">{author.name}</:col>
 

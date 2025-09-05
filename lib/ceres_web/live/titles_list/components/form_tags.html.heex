@@ -46,7 +46,6 @@
             rows={@results}
             row_id={fn row -> "tag-#{row.id}" end}
             row_click={fn row -> JS.push("add-tag", value: %{id: row.id}, target: @myself) end}
-            class=""
           >
             <:col :let={tag} label="Name">{tag.name}</:col>
 

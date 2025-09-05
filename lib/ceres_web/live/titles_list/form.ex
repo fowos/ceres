@@ -89,13 +89,20 @@ defmodule CeresWeb.TitlesList.Form do
   def save_title(socket, :new, title_params) do
     case Titles.create_title(title_params) do
       {:ok, title} ->
+        # Add authors in relation for title struct
         Enum.each(socket.assigns.authors, fn {author, role} ->
           Authors.create_authors_titles(%{
             author_id: author.id,
             title_id: title.id,
-            author_role: role_to_atom(role)
+            author_role: role_to_atom(role),
           })
         end)
+
+        # Add tags in relation for title struct
+        Enum.each(socket.assigns.tags, fn tag ->
+          Tags.create_titles_tags(%{title_id: title.id, tag_id: tag.id})
+        end)
+
 
         {:noreply,
          socket
@@ -158,8 +165,6 @@ defmodule CeresWeb.TitlesList.Form do
     end
   end
 
-  defp find_author(authors, id), do: Enum.find(authors, fn {a, _r} -> a.id == id end)
-
   @impl true
   def handle_info({:flash, kind, msg}, socket) do
     {:noreply, socket |> put_flash(kind, msg)}
@@ -182,7 +187,7 @@ defmodule CeresWeb.TitlesList.Form do
             title_id: socket.assigns.title.id,
             tag_id: tag.id
           }) do
-            {:ok, tag} -> {:noreply, socket |> assign(:tags, tags)}
+            {:ok, _tag} -> {:noreply, socket |> assign(:tags, tags)}
             {:error, changeset} ->
               Logger.error("Error while connecting tag with title. \n #{inspect(changeset)}")
               {:noreply, socket |> put_flash(:error, "Error while connecting tag with title, please check server logs")}
@@ -215,4 +220,7 @@ defmodule CeresWeb.TitlesList.Form do
     Logger.error("Unknown author role, #{role}")
     raise ArgumentError, "Unknown author role, '#{inspect(role)}'"
   end
+
+    defp find_author(authors, id), do: Enum.find(authors, fn {a, _r} -> a.id == id end)
+
 end

@@ -15,10 +15,25 @@ defmodule CeresWeb.Components.NavbarLive do
 
       <div class="divider"></div>
 
-      <div class="font-medium flex flex-row gap-2 mx-auto w-full">
+      <div class="font-medium flex flex-col gap-2 mx-auto w-full">
         <div class="text-base-content hover:text-primary duration-300">
-          <.icon name="hero-queue-list" class="size-6" />
-          <.link class="whitespace-nowrap" navigate={~p"/titles"}>Titles</.link>
+          <.link
+            class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
+            navigate={~p"/titles"}
+          >
+            <.icon name="hero-queue-list" class="size-6" />
+            Titles
+          </.link>
+        </div>
+
+        <div class="text-base-content hover:text-primary duration-300">
+          <.link
+            class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
+            navigate={~p"/comics"}
+          >
+            <.icon name="hero-document" class="size-6" />
+            Comics
+          </.link>
         </div>
       </div>
     </div>

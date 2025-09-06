@@ -25,17 +25,17 @@
 
       <.form onsubmit="return false;">
         <.input
-        type="text"
-        id="search"
-        name="search"
-        label="Select authors"
-        placeholder="Enter author name"
-        phx-debounce="400"
-        phx-change="search"
-        phx-target={@myself}
-        autocomplete="off"
-        value={@search}
-      />
+          type="text"
+          id="search"
+          name="search"
+          label="Select authors"
+          placeholder="Enter author name"
+          phx-debounce="400"
+          phx-change="search"
+          phx-target={@myself}
+          autocomplete="off"
+          value={@search}
+        />
 
       </.form>
 

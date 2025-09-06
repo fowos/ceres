@@ -1,0 +1,94 @@
+<div>
+  <.header>
+    Select publishers
+  </.header>
+
+  <div class="mx-auto">
+    <div class="relative w-full">
+      <.table
+        :if={@publishers != []}
+        id="publishers-table"
+        rows={@publishers}
+      >
+        <:col :let={publisher} label="Name">{publisher.name}</:col>
+
+        <:action :let={publisher}>
+          <.button
+            phx-click="remove-publisher" phx-target={@myself} phx-value-id={publisher.id}
+            class="cursor-pointer text-error"
+          >
+            <.icon name="hero-trash" class="h-5 w-5 hover:text-error-content duration-300"/>
+          </.button>
+        </:action>
+      </.table>
+
+      <.form onsubmit="return false;">
+        <.input
+        type="text"
+        id="search"
+        name="search"
+        label="Select publishers"
+        placeholder="Enter publisher name"
+        phx-debounce="400"
+        phx-change="search"
+        phx-target={@myself}
+        autocomplete="off"
+        value={@search}
+      />
+
+      </.form>
+
+      <div class="absolute left-0 top-full w-full z-50">
+        <%= if @results != [] do %>
+          <div class="absolute left-0 bg-base-300 top-full w-full z-50 rounded-md border border-base-100 shadow-lg">
+            <.table
+              id="results-table"
+              rows={@results}
+            >
+              <:col :let={publisher} label="Name">{publisher.name}</:col>
+            </.table>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
+
+    <div class="divider">or</div>
+
+    <div class="w-full">
+      <.form
+        for={@changeset}
+        phx-submit="save"
+        phx-change="validate"
+        phx-target={@myself}
+        class="w-full"
+      >
+        <.header>
+          Create a new publisher
+        </.header>
+
+        <.input
+          type="text"
+          field={@changeset[:name]}
+          phx-debounce="400"
+          label="Name"
+          placeholder="Enter publisher name"
+          autocomplete="off"
+        />
+        <.input
+          type="textarea"
+          field={@changeset[:description]}
+          phx-debounce="400"
+          label="Description"
+          placeholder="Enter publisher description"
+          autocomplete="off"
+        />
+
+        <footer class="flex justify-start gap-4">
+          <.button phx-target={@myself} phx-disable-with="Saving..." variant="primary" type="submit">Add</.button>
+          <.button phx-target={@myself} type="button" phx-click="clear-form" class="btn bg-warning">Clear</.button>
+        </footer>
+      </.form>
+    </div>
+  </div>
+</div>

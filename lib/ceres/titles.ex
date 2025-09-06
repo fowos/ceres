@@ -391,4 +391,17 @@ defmodule Ceres.Titles do
   def change_page(%Page{} = page, attrs \\ %{}) do
     Page.changeset(page, attrs)
   end
+
+  @doc """
+  Get all chapters from a comic
+
+  ## Examples
+
+      iex> get_comics_chapters(comics_id)
+      [%Chapter{} | term()]
+
+  """
+  def get_comics_chapters(comics_id) do
+    Repo.all(from c in Chapter, where: c.comic_id == ^comics_id)
+  end
 end

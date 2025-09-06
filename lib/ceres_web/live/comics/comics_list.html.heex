@@ -1,0 +1,44 @@
+<Layouts.app flash={@flash}>
+
+  <div class="w-full flex flex-col gap-4 bg-base-200 rounded-lg mb-4">
+
+    <.header>
+      Comics page
+      <:subtitle>
+        On this page you can edit your comics [maybe]
+      </:subtitle>
+
+      <:actions>
+        <.button class="btn btn-primary rounded-lg" navigate={~p"/comics/new"} value="true">
+          Create <.icon name="hero-document-plus" class="size-5" />
+        </.button>
+      </:actions>
+    </.header>
+
+    <div class="overflow-x-auto">
+      <.table
+        id="titles"
+        rows={@streams.comics}
+      >
+        <:col :let={{_id, comic}} label="Name">{comic.name}</:col>
+        <:col :let={{_id, comic}} label="Title">{comic.title_id}</:col>
+        <:col :let={{_id, comic}} label="Description">{localizers_names(comic.localizers)}</:col>
+        <:col :let={{_id, comic}} label="Language">{lang_atom_to_string(comic.language)}</:col>
+
+        <:action :let={{_id, comic}}>
+          <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/comics/#{comic}/chapters"}>Chapters</.button>
+          <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/comics/#{comic}/edit"}>Edit</.button>
+          <.button
+            class="btn btn-error btn-soft rounded-lg"
+            phx-click="delete-comic"
+            phx-value-id={comic.id}
+            data-confirm="Are you sure?"
+          >
+            <.icon name="hero-trash" class="size-5"></.icon>
+          </.button>
+        </:action>
+      </.table>
+    </div>
+
+  </div>
+</Layouts.app>

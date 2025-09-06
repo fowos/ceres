@@ -58,6 +58,11 @@ scope "/", CeresWeb do
       live "/titles", TitlesList.TitlesListLive, :index
       live "/titles/new", TitlesList.Form, :new
       live "/titles/:id/edit", TitlesList.Form, :edit
+
+      live "/comics", Comics.ComicsList, :index
+      live "/comics/new", Comics.FormNew, :new
+      live "/comics/:id/edit", Comics.FormEdit, :edit
+      live "/comics/:id/chapters", Comics.ComicsChapters, :index
     end
 
     post "/users/update-password", UserSessionController, :update_password

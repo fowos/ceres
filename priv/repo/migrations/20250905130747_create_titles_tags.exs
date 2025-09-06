@@ -4,8 +4,8 @@ defmodule Ceres.Repo.Migrations.CreateTitlesTags do
   def change do
     create table(:titles_tags, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :title_id, references(:titles, on_delete: :nothing, type: :binary_id), null: false
-      add :tag_id, references(:tags, on_delete: :nothing, type: :binary_id), null: false
+      add :title_id, references(:titles, on_delete: :delete_all, type: :binary_id), null: false
+      add :tag_id, references(:tags, on_delete: :delete_all, type: :binary_id), null: false
 
       timestamps(type: :utc_datetime)
     end

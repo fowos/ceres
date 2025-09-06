@@ -1,17 +1,18 @@
 defmodule CeresWeb.TitlesList.Form do
-  require Ecto.Query
+  use CeresWeb, :live_view
+
+  alias Ceres.Authors.Publisher
   alias Ceres.Tags.TitlesTags
   alias Ceres.Tags.Tag
   alias Ceres.Tags
   alias Ceres.Authors.Author
   alias Ceres.Authors
-  use CeresWeb, :live_view
-
   alias Ceres.Titles
   alias Ceres.Titles.Title
   alias Ceres.Repo
 
   require Logger
+  require Ecto.Query
 
 
   @impl true
@@ -35,6 +36,7 @@ defmodule CeresWeb.TitlesList.Form do
     |> assign(:title, title)
     |> assign(:form, to_form(Titles.change_title(title)))
     |> assign(:authors, [])
+    |> assign(:publishers, [])
     |> assign(:tags, [])
   end
 
@@ -48,12 +50,17 @@ defmodule CeresWeb.TitlesList.Form do
     |> Map.get(:authors_titles)
     |> Enum.map(fn at -> {Repo.preload(at, :author).author, at.author_role} end)
 
+    publishers = title
+    |> Repo.preload(:publishers)
+    |> Map.get(:publishers)
+    |> IO.inspect(label: "publishers")
 
     socket
     |> assign(:page_title, "Edit Title")
     |> assign(:title, title)
     |> assign(:form, to_form(Titles.change_title(title)))
     |> assign(:authors, authors)
+    |> assign(:publishers, publishers)
     |> assign(:tags, tags)
 
   end
@@ -67,7 +74,7 @@ defmodule CeresWeb.TitlesList.Form do
     {:noreply,
     socket
     |> assign(:form, to_form(changeset))}
-    end
+  end
 
   def handle_event("save", %{"title" => title_params}, socket) do
     save_title(socket, socket.assigns.live_action, title_params)
@@ -101,6 +108,11 @@ defmodule CeresWeb.TitlesList.Form do
         # Add tags in relation for title struct
         Enum.each(socket.assigns.tags, fn tag ->
           Tags.create_titles_tags(%{title_id: title.id, tag_id: tag.id})
+        end)
+
+        # Add publishers in relatiuon for title struct
+        Enum.each(socket.assigns.publishers, fn pub ->
+          Authors.create_publishers_titles(%{title_id: title.id, publisher_id: pub.id})
         end)
 
 
@@ -142,6 +154,7 @@ defmodule CeresWeb.TitlesList.Form do
     end
   end
 
+  @impl true
   def handle_info({:remove_author, author_id}, socket) do
     authors = socket.assigns.authors
 
@@ -162,6 +175,57 @@ defmodule CeresWeb.TitlesList.Form do
       _ ->
         Logger.error("Author with id #{author_id} not found in title #{socket.assigns.title.id}")
         {:noreply, socket |> put_flash(:error, "Author not found in title")}
+    end
+  end
+
+  @impl true
+  def handle_info({:add_publisher, publisher}, socket) do
+    if Enum.any?(socket.assigns.publishers, fn p -> p.id == publisher.id end) do
+      {:noreply, socket |> put_flash(:error, "Publisher already added")}
+    else
+      publishers = socket.assigns.publishers ++ [publisher]
+      |> Enum.uniq_by(fn p -> p.id end)
+
+      case socket.assigns.live_action do
+        :new -> {:noreply, assign(socket, :publishers, publishers)}
+        :edit ->
+          Authors.create_publishers_titles(%{
+            publisher_id: publisher.id,
+            title_id: socket.assigns.title.id
+          })
+
+          socket = socket
+          |> put_flash(:info, "Publisher added successfully")
+          |> assign(:publishers, publishers)
+
+          {:noreply, socket}
+      end
+    end
+  end
+
+  def handle_info({:remove_publisher, publisher_id}, socket) do
+    publishers = socket.assigns.publishers
+
+    with %Publisher{} = publisher <- find_publisher(publishers, publisher_id) do
+
+      if socket.assigns.live_action == :edit do
+        Authors.delete_publishers_titles_by_title_id(socket.assigns.title.id, publisher.id)
+      end
+
+      publishers = Enum.reject(publishers, fn p -> p.id == publisher_id end)
+
+      socket = socket
+      |> put_flash(:info, "Publisher '#{publisher.name}' removed successfully")
+      |> assign(:publishers, publishers)
+
+      IO.inspect(publisher, label: "publishers")
+      IO.inspect(publisher_id, label: "id")
+
+      {:noreply, socket}
+    else
+      _ ->
+        Logger.error("Publisher with id #{publisher_id} not found in title #{socket.assigns.title.id}")
+        {:noreply, socket |> put_flash(:error, "Publisher not found in title")}
     end
   end
 
@@ -221,6 +285,7 @@ defmodule CeresWeb.TitlesList.Form do
     raise ArgumentError, "Unknown author role, '#{inspect(role)}'"
   end
 
-    defp find_author(authors, id), do: Enum.find(authors, fn {a, _r} -> a.id == id end)
+  defp find_author(authors, id), do: Enum.find(authors, fn {a, _r} -> a.id == id end)
+  defp find_publisher(publishers, id), do: Enum.find(publishers, fn p -> p.id == id end)
 
 end

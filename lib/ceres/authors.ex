@@ -286,6 +286,7 @@ defmodule Ceres.Authors do
     |> Repo.delete_all()
   end
 
+
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking authors_titles changes.
 
@@ -421,5 +422,16 @@ defmodule Ceres.Authors do
     query = from a in Author,
             where: ilike(a.name, ^"%#{name}%")
     Repo.all(query)
+  end
+
+  def get_publishers_by_name(name) do
+    query = from p in Publisher,
+            where: ilike(p.name, ^"%#{name}%")
+    Repo.all(query)
+  end
+
+  def delete_publishers_titles_by_title_id(title_id, publisher_id) do
+    from(at in PublishersTitles, where: at.title_id == ^title_id and at.publisher_id == ^publisher_id)
+    |> Repo.delete_all()
   end
 end

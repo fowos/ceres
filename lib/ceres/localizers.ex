@@ -102,6 +102,11 @@ defmodule Ceres.Localizers do
     Localizer.changeset(localizer, attrs)
   end
 
+
+  def get_localizers_by_part_name(part_name) do
+    Repo.all(from l in Localizer, where: ilike(l.name, ^"%#{part_name}%"))
+  end
+
   alias Ceres.Localizers.LocalizersComics
 
   @doc """
@@ -183,6 +188,18 @@ defmodule Ceres.Localizers do
   """
   def delete_localizers_comics(%LocalizersComics{} = localizers_comics) do
     Repo.delete(localizers_comics)
+  end
+
+  @doc """
+  Deletes localizers_comics by localizer_id and comic_id
+
+  ## Examples
+
+      iex> delete_localizers_comics_by_attrs(localizer_id, comic_id)
+      {non_neg_integer(), nil | [term()]}
+  """
+  def delete_localizers_comics_by_attrs(localizer_id, comic_id) do
+    Repo.delete_all(from lc in LocalizersComics, where: lc.localizer_id == ^localizer_id and lc.comic_id == ^comic_id)
   end
 
   @doc """

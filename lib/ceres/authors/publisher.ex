@@ -8,7 +8,7 @@ defmodule Ceres.Authors.Publisher do
     field :name, :string
     field :description, :string
 
-    has_many :publishers_titles, Ceres.Publishers.PublishersTitles
+    has_many :publishers_titles, Ceres.Authors.PublishersTitles
     has_many :titles, through: [:publishers_titles, :title]
 
     timestamps(type: :utc_datetime)

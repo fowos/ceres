@@ -1,0 +1,40 @@
+<Layouts.app flash={@flash}>
+
+  <.header>
+    Chapters for comics
+    <span class="font-bold">"{@comic.name}"</span>
+    <:subtitle>
+      On this page you can adding chapters for your comics
+    </:subtitle>
+
+    <:actions>
+      <.button class="btn btn-primary rounded-lg" navigate={~p"/comics/new"} value="true">
+        Create <.icon name="hero-document-plus" class="size-5" />
+      </.button>
+    </:actions>
+  </.header>
+
+  <div class="w-full flex flex-col gap-4 lg:gap-8 bg-base-200 rounded-lg mb-4 max-w-5xl mx-auto w-full">
+    <div class="overflow-x-auto">
+      <.table
+        id="titles"
+        rows={@streams.chapters}
+      >
+        <:col :let={{_id, chapter}} label="Name">{chapter.volume}</:col>
+        <:col :let={{_id, chapter}} label="Title">{chapter.number}</:col>
+        <:col :let={{_id, chapter}} label="Page count">tmp zero :(</:col>
+
+        <:action :let={{_id, chapter}}>
+          <.button
+            class="btn btn-error btn-soft rounded-lg"
+            phx-click="delete-chapter"
+            phx-value-id={chapter.id}
+            data-confirm="Are you sure?"
+          >
+            <.icon name="hero-trash" class="size-5"></.icon>
+          </.button>
+        </:action>
+      </.table>
+    </div>
+  </div>
+</Layouts.app>

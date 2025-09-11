@@ -26,22 +26,22 @@
       </.form>
 
 
-      <div :if={@status != nil}>
+      <div :if={@pages != []}>
         <.table
           id="pages"
           rows={@pages}
         >
-          <:col :let={page} label="Path">{page.path}</:col>
+          <:col :let={page} label="Temp path">{page.path}</:col>
 
-          <:col :let={page} label="Size (bytes)">{page.size}</:col>
+          <:col :let={page} label="Old size">{page.size}</:col>
 
-          <:col :let={page} label="New size (bytes)">
-            <span class="text-success">{page.new_size}</span>
+          <:col :let={page} label="AVIF size">
+            <span class="font-semibold">{page.new_size}</span>
           </:col>
 
-          <:col :let={page} label="Converted">
+          <:col :let={page} label="AVIF">
             <%= if page.is_converted do %>
-              <.icon name="hero-check" class="text-success size-5"></.icon>
+              <.icon name="hero-check-circle" class="text-success size-5"></.icon>
             <% else %>
               <.icon name="hero-x-mark" class="text-error size-5"></.icon>
             <% end %>
@@ -49,7 +49,7 @@
 
           <:col :let={page} label="S3">
             <%= if page.s3 do %>
-              <.icon name="hero-check" class="text-success size-5"></.icon>
+              <.icon name="hero-check-circle" class="text-success size-5"></.icon>
             <% else %>
               <.icon name="hero-x-mark" class="text-error size-5"></.icon>
             <% end %>

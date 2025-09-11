@@ -19,6 +19,7 @@ defmodule Ceres.Storage.S3 do
         Logger.error("Error while uploading #{path} to s3. Error: #{inspect(error)}")
         send(parent_pid, {:error, error})
     end
+    File.rm!(path)
 
   end
 end

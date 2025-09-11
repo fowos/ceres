@@ -1,4 +1,5 @@
 defmodule CeresWeb.Chapters.ChaptersNew do
+alias Ceres.Storage.Converter
   use CeresWeb, :live_view
 
   alias Ceres.Titles.Chapter
@@ -14,7 +15,6 @@ defmodule CeresWeb.Chapters.ChaptersNew do
     |> assign(:comic, comic)
     |> assign(:chapter, %Chapter{comic_id: comic.id})
     |> assign(:form, Titles.change_chapter(%Chapter{}) |> to_form)
-    |> assign(:status, nil)
     |> assign(:pages, [])
     |> allow_upload(:chapter_zip, accept: ~w(.zip), max_entries: 1, max_file_size: 50_000_000)
 
@@ -41,15 +41,9 @@ defmodule CeresWeb.Chapters.ChaptersNew do
     }
 
     with {:ok, %Chapter{} = chapter} <- Titles.create_chapter(chapter) |> IO.inspect(label: "chapter"),
-    {:ok, _path} <- parse_zip_chapter(
-        socket,
-        socket.assigns.uploads.chapter_zip,
-        socket.assigns.comic.id,
-        chapter_params["volume"],
-        chapter_params["number"],
-        chapter.id
-      )
+        {:ok, _path} <- parse_zip_chapter(socket, chapter)
       do
+        convert_images(chapter)
 
         {:noreply, socket |> assign(:created_chapter_id, chapter.id)}
       else
@@ -65,42 +59,54 @@ defmodule CeresWeb.Chapters.ChaptersNew do
     {:noreply, socket}
   end
 
-  defp parse_zip_chapter(socket, chapter_zip, comic_id, volume, number, chapter_id) do
-    uploaded_files =
-      consume_uploaded_entries(socket, :chapter_zip, fn %{path: path} = params, _entry ->
-        with {:ok, binary} <- File.read(path),
-          {:ok, files} <- :zip.unzip(binary, [{:cwd, ~c"#{get_path_to_uploads(comic_id, volume, number)}"}])
-          do
-            pid = self()
-            Task.start(fn -> Ceres.Storage.Converter.dir_to_avif(get_path_to_uploads(comic_id, volume, number), pid, chapter_id) end)
-            {:ok, "priv/static/uploads/#{comic_id}"}
-          else
-            other ->
-              IO.inspect(other, label: "other")
-              Logger.error("Error while unzipping chapter. \n #{inspect(other)}")
-              {:error, "Error while unzipping chapter"}
-          end
-      end)
-    {:ok, uploaded_files}
+  defp parse_zip_chapter(socket, %Chapter{} = chapter) do
+    path = consume_uploaded_entries(socket, :chapter_zip, fn %{path: path} = params, _entry ->
+
+      dest = String.to_charlist(get_path_to_uploads(chapter.comic_id, chapter.volume, chapter.number))
+      with {:ok, binary} <- File.read(path),
+           {:ok, files} <- :zip.unzip(binary, [{:cwd, dest}])
+      do
+
+        {:ok, "priv/static/uploads/#{chapter.comic_id}"}
+      else
+        other ->
+          raise "Error while unzipping chapter. \n#{inspect(other)}"
+      end
+    end)
+
+    if Enum.count(path) == 1 do
+      {:ok, List.first(path)}
+    else
+      {:ok, path}
+    end
+  end
+
+  defp convert_images(%Chapter{} = chapter) do
+    pid = self()
+    Task.start(fn ->
+      Converter.dir_to_avif(
+        get_path_to_uploads(chapter.comic_id, chapter.volume, chapter.number),
+        pid,
+        chapter.id)
+    end)
   end
 
   defp get_path_to_uploads(comic_id, volume, number), do: "priv/static/uploads/#{comic_id}/#{volume}-#{number}"
 
-
+  @impl Phoenix.LiveView
   def handle_info({:started, files}, socket) do
     pages = Enum.map(files, fn {ref, path, size} ->
-      %{id: :erlang.ref_to_list(ref), path: path, size: size, new_size: nil, is_converted: false, s3: false}
+      %{id: :erlang.ref_to_list(ref), path: path, size: format_bytes(size), new_size: nil, is_converted: false, s3: false}
     end)
-    |> IO.inspect(label: "pages")
 
     socket = socket
-    |> assign(:status, :started)
     |> assign(:pages, pages)
 
 
     {:noreply, socket}
   end
 
+  @impl Phoenix.LiveView
   def handle_info({:error, error}, socket) do
     Titles.get_chapter!(socket.assigns.created_chapter_id)
     |> Titles.delete_chapter()
@@ -111,16 +117,18 @@ defmodule CeresWeb.Chapters.ChaptersNew do
   @doc """
   Handle info from convert_to_avif
   """
+  @impl Phoenix.LiveView
   def handle_info({:converted, {ref, size}}, socket) do
     pages = socket.assigns.pages
     page = Enum.find(pages, fn p -> p.id == :erlang.ref_to_list(ref) end)
 
     socket = socket
-    |> assign(:pages, List.replace_at(pages, pages |> Enum.find_index(fn p -> p.id == :erlang.ref_to_list(ref) end), %{page | new_size: size, is_converted: true}))
+    |> assign(:pages, List.replace_at(pages, pages |> Enum.find_index(fn p -> p.id == :erlang.ref_to_list(ref) end), %{page | new_size: format_bytes(size), is_converted: true}))
 
     {:noreply, socket}
   end
 
+  @impl Phoenix.LiveView
   def handle_info({:saved, ref}, socket) do
     pages = socket.assigns.pages
 
@@ -130,5 +138,30 @@ defmodule CeresWeb.Chapters.ChaptersNew do
     |> assign(:pages, List.replace_at(pages, pages |> Enum.find_index(fn p -> p.id == :erlang.ref_to_list(ref) end), %{page | s3: true}))
 
     {:noreply, socket}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_info({:finished}, socket) do
+    socket = socket
+    |> put_flash(:info, "Chapter created successfully")
+
+    {:noreply, socket}
+  end
+
+
+
+
+  @units ["B", "KB", "MB", "GB", "TB", "PB"]
+
+  def format_bytes(bytes) when is_integer(bytes) and bytes >= 0 do
+    format(bytes, 0)
+  end
+
+  defp format(bytes, unit_index) when bytes < 1024 or unit_index == length(@units) - 1 do
+    "#{round(bytes)} #{@units |> Enum.at(unit_index)}"
+  end
+
+  defp format(bytes, unit_index) do
+    format(bytes / 1024, unit_index + 1)
   end
 end

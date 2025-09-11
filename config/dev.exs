@@ -86,3 +86,11 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "10.10.1.12",
+  port: 9000,
+  access_key_id: "minioadmin",
+  secret_access_key: "minioadmin"

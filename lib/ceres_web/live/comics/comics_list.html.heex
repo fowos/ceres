@@ -26,7 +26,7 @@
         <:col :let={{_id, comic}} label="Language">{lang_atom_to_string(comic.language)}</:col>
 
         <:action :let={{_id, comic}}>
-          <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/comics/#{comic}/chapters"}>Chapters</.button>
+          <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/chapters/comic/#{comic}"}>Chapters</.button>
           <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/comics/#{comic}/edit"}>Edit</.button>
           <.button
             class="btn btn-error btn-soft rounded-lg"

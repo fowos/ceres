@@ -62,7 +62,9 @@ scope "/", CeresWeb do
       live "/comics", Comics.ComicsList, :index
       live "/comics/new", Comics.FormNew, :new
       live "/comics/:id/edit", Comics.FormEdit, :edit
-      live "/comics/:id/chapters", Comics.ComicsChapters, :index
+
+      live "/chapters/comic/:id", Chapters.ChaptersHome, :index
+      live "/chapters/new/:id", Chapters.ChaptersNew, :new
     end
 
     post "/users/update-password", UserSessionController, :update_password

@@ -1,0 +1,65 @@
+<Layouts.app flash={@flash}>
+  <div class="w-full flex flex-col gap-4 lg:gap-8 bg-base-200 rounded-lg mb-4 max-w-5xl mx-auto">
+    <div>
+      <.form for={@form} id="chapter-form" phx-change="validate" phx-submit="save">
+        <.header>Edit chapter params</.header>
+
+        <.input field={@form[:volume]} phx-debounce="400"  type="number" label="Volume number"/>
+        <.input field={@form[:number]} phx-debounce="400" type="number" label="Chapter number"/>
+
+        <div class="flex flex-col gap-4 mb-4">
+          <.live_file_input phx-change="validate-upload" phx-submit="submit-upload" class="w-full bg-base-100 p-2 rounded-md" upload={@uploads.chapter_zip} />
+
+          <%= for entry <- @uploads.chapter_zip.entries do %>
+            <div class="flex flex-row justify-between bg-base-300 rounded-md p-2 px-4">
+              <p><%= entry.client_name %></p>
+              <p>(<%= entry.progress %>%)</p>
+            </div>
+          <% end %>
+
+        </div>
+
+
+        <footer>
+          <.button phx-disable-with="Saving..." variant="primary">Save</.button>
+        </footer>
+      </.form>
+
+
+      <div :if={@status != nil}>
+        <.table
+          id="pages"
+          rows={@pages}
+        >
+          <:col :let={page} label="Path">{page.path}</:col>
+
+          <:col :let={page} label="Size (bytes)">{page.size}</:col>
+
+          <:col :let={page} label="New size (bytes)">
+            <span class="text-success">{page.new_size}</span>
+          </:col>
+
+          <:col :let={page} label="Converted">
+            <%= if page.is_converted do %>
+              <.icon name="hero-check" class="text-success size-5"></.icon>
+            <% else %>
+              <.icon name="hero-x-mark" class="text-error size-5"></.icon>
+            <% end %>
+          </:col>
+
+          <:col :let={page} label="S3">
+            <%= if page.s3 do %>
+              <.icon name="hero-check" class="text-success size-5"></.icon>
+            <% else %>
+              <.icon name="hero-x-mark" class="text-error size-5"></.icon>
+            <% end %>
+          </:col>
+        </.table>
+
+      </div>
+
+
+
+    </div>
+  </div>
+</Layouts.app>

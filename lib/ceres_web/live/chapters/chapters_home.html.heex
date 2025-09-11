@@ -8,7 +8,7 @@
     </:subtitle>
 
     <:actions>
-      <.button class="btn btn-primary rounded-lg" navigate={~p"/comics/new"} value="true">
+      <.button class="btn btn-primary rounded-lg" navigate={~p"/chapters/new/#{@comic}"} value="true">
         Create <.icon name="hero-document-plus" class="size-5" />
       </.button>
     </:actions>
@@ -20,9 +20,9 @@
         id="titles"
         rows={@streams.chapters}
       >
-        <:col :let={{_id, chapter}} label="Name">{chapter.volume}</:col>
-        <:col :let={{_id, chapter}} label="Title">{chapter.number}</:col>
-        <:col :let={{_id, chapter}} label="Page count">tmp zero :(</:col>
+        <:col :let={{_id, chapter}} label="Volume">{chapter.volume}</:col>
+        <:col :let={{_id, chapter}} label="Number">{chapter.number}</:col>
+        <:col :let={{_id, chapter}} label="Page count">work in progress</:col>
 
         <:action :let={{_id, chapter}}>
           <.button

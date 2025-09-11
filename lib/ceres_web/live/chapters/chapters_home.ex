@@ -1,5 +1,5 @@
-defmodule CeresWeb.Comics.ComicsChapters do
-alias Ceres.Titles
+defmodule CeresWeb.Chapters.ChaptersHome do
+  alias Ceres.Titles
   use CeresWeb, :live_view
 
 

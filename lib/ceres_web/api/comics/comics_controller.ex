@@ -19,6 +19,9 @@ defmodule CeresWeb.Api.Comics.ComicsController do
     |> Enum.reduce(titles_comics, fn comic, acc -> [comic | acc] end)
     |> Enum.uniq()
 
+
+    comics = Repo.preload(comics, [title: [:authors, :publishers, :tags]])
+
     render(conn, :index, comics: comics)
   end
 
@@ -26,7 +29,7 @@ defmodule CeresWeb.Api.Comics.ComicsController do
   List all comics
   """
   def index(conn, _params) do
-    comics = Titles.list_comics() |> Repo.preload([:localizers, :chapters])
+    comics = Titles.list_comics() |> Repo.preload([:localizers, :chapters, title: [:authors, :publishers, :tags]])
     render(conn, :index, comics: comics)
   end
 end

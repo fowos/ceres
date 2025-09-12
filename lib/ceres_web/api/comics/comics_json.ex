@@ -16,7 +16,10 @@ defmodule CeresWeb.Api.Comics.ComicsJSON do
       name: comic.name,
       language: comic.language,
       localizers: localizers(comic),
-      chapters: chapters(comic)
+      chapters: chapters(comic),
+      publishers: publishers(comic),
+      authors: authors(comic),
+      tags: tags(comic)
     }
   end
 
@@ -24,7 +27,8 @@ defmodule CeresWeb.Api.Comics.ComicsJSON do
     Enum.map(comic.localizers, fn local ->
        %{
          id: local.id,
-         name: local.name
+         name: local.name,
+         description: local.description
        }
     end)
   end
@@ -38,4 +42,35 @@ defmodule CeresWeb.Api.Comics.ComicsJSON do
       }
     end)
   end
+
+  defp authors(%Comic{} = comic) do
+    Enum.map(comic.title.authors, fn author ->
+      %{
+        id: author.id,
+        name: author.name,
+        description: author.description
+      }
+    end)
+  end
+
+  defp publishers(%Comic{} = comic) do
+    Enum.map(comic.title.publishers, fn publisher ->
+      %{
+        id: publisher.id,
+        name: publisher.name,
+        description: publisher.description
+      }
+    end)
+  end
+
+  defp tags(%Comic{} = comic) do
+    Enum.map(comic.title.tags, fn tag ->
+      %{
+        id: tag.id,
+        name: tag.name,
+      }
+    end)
+  end
+
+
 end

@@ -11,7 +11,8 @@ defmodule Ceres.Storage.S3 do
   Upload image to s3
 
   Sends message to parent process:
-  {:saved, ref}
+
+    {:saved, ref}
   """
   @spec upload_image_to_s3(String.t(), pid(), String.t(), reference()) :: :ok
   def upload_image_to_s3(path, parent_pid, name, ref) do

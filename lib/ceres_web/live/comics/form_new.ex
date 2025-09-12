@@ -6,7 +6,7 @@ defmodule CeresWeb.Comics.FormNew do
   #  [en: 0, jp: 1, kr: 2, cn: 3, ru: 4]
   @language_options [{"English", :en}, {"Japanese", :jp}, {"Korean", :kr}, {"Chinese", :cn}, {"Russian", :ru}]
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     comic = %Comic{}
 
@@ -18,7 +18,7 @@ defmodule CeresWeb.Comics.FormNew do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("validate", %{"comic" => params}, socket) do
     changeset =
       Titles.change_comic(socket.assigns.comic, params)
@@ -27,11 +27,11 @@ defmodule CeresWeb.Comics.FormNew do
     {:noreply, socket |> assign(:form, to_form(changeset))}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("save", %{"comic" => params}, socket) do
     case Titles.create_comic(params) do
       {:ok, comic} ->
-        {:noreply, redirect(socket, to: "/comics")}
+        {:noreply, redirect(socket, to: "/comics/#{comic.id}/edit")}
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, socket |> assign(:form, to_form(changeset))}
     end

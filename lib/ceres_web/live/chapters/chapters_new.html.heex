@@ -20,8 +20,9 @@
         </div>
 
 
-        <footer>
+        <footer class="flex flex-row gap-4">
           <.button phx-disable-with="Saving..." variant="primary">Save</.button>
+          <.button navigate={~p"/chapters/comic/#{@comic}"}>Back</.button>
         </footer>
       </.form>
 
@@ -41,17 +42,17 @@
 
           <:col :let={page} label="AVIF">
             <%= if page.is_converted do %>
-              <.icon name="hero-check-circle" class="text-success size-5"></.icon>
+              <.icon name="hero-check-circle" class="text-success size-5"/>
             <% else %>
-              <.icon name="hero-x-mark" class="text-error size-5"></.icon>
+              <.icon name="hero-x-mark" class="text-error size-5"/>
             <% end %>
           </:col>
 
           <:col :let={page} label="S3">
             <%= if page.s3 do %>
-              <.icon name="hero-check-circle" class="text-success size-5"></.icon>
+              <.icon name="hero-check-circle" class="text-success size-5"/>
             <% else %>
-              <.icon name="hero-x-mark" class="text-error size-5"></.icon>
+              <.icon name="hero-x-mark" class="text-error size-5"/>
             <% end %>
           </:col>
         </.table>

@@ -60,11 +60,11 @@ alias Ceres.Storage.Converter
   end
 
   defp parse_zip_chapter(socket, %Chapter{} = chapter) do
-    path = consume_uploaded_entries(socket, :chapter_zip, fn %{path: path} = params, _entry ->
+    path = consume_uploaded_entries(socket, :chapter_zip, fn %{path: path}, _entry ->
 
       dest = String.to_charlist(get_path_to_uploads(chapter.comic_id, chapter.volume, chapter.number))
       with {:ok, binary} <- File.read(path),
-           {:ok, files} <- :zip.unzip(binary, [{:cwd, dest}])
+           {:ok, _files} <- :zip.unzip(binary, [{:cwd, dest}])
       do
 
         {:ok, "priv/static/uploads/#{chapter.comic_id}"}

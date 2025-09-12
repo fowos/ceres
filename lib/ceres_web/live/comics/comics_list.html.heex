@@ -24,6 +24,7 @@
         <:col :let={{_id, comic}} label="Title">{comic.title_id}</:col>
         <:col :let={{_id, comic}} label="Description">{localizers_names(comic.localizers)}</:col>
         <:col :let={{_id, comic}} label="Language">{lang_atom_to_string(comic.language)}</:col>
+        <:col :let={{_id, comic}} label="Chapters">{Enum.count(comic.chapters)}</:col>
 
         <:action :let={{_id, comic}}>
           <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/chapters/comic/#{comic}"}>Chapters</.button>

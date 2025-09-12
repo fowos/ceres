@@ -5,12 +5,15 @@ defmodule Ceres.Storage.S3 do
 
   require Logger
 
+  @bucket "comics:"
+
   @doc """
   Upload image to s3
 
   Sends message to parent process:
   {:saved, ref}
   """
+  @spec upload_image_to_s3(String.t(), pid(), String.t(), reference()) :: :ok
   def upload_image_to_s3(path, parent_pid, name, ref) do
     case S3.put_object("comics", name, File.read!(path)) |> ExAws.request do
       {:ok, _} ->
@@ -20,6 +23,19 @@ defmodule Ceres.Storage.S3 do
         send(parent_pid, {:error, error})
     end
     File.rm!(path)
+  end
 
+  @spec remove_image_from_s3(String.t()) :: :ok | :error
+  def remove_image_from_s3(@bucket <> path) do
+    IO.inspect(path, label: "path")
+
+    case S3.delete_object("comics", path) |> ExAws.request do
+      {:ok, _} ->
+        Logger.debug("Removed #{@bucket <> path} from s3")
+        :ok
+      {:error, error} ->
+        Logger.error("Error while removing #{path} from s3. Error: #{inspect(error)}")
+        :error
+    end
   end
 end

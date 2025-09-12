@@ -24,9 +24,11 @@ scope "/", CeresWeb do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", CeresWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", CeresWeb do
+    pipe_through :api
+
+    get "/files/*key", FileController.FileController, :download
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:ceres, :dev_routes) do

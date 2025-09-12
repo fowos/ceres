@@ -8,7 +8,7 @@ defmodule CeresWeb.Comics.ComicsList do
 
   @impl true
   def mount(_params, _session, socket) do
-    comics = Titles.list_comics |> Repo.preload(:localizers)
+    comics = Titles.list_comics |> Repo.preload([:localizers, :chapters])
 
     socket = socket
     |> stream(:comics, comics)

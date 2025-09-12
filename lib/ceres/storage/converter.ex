@@ -25,9 +25,11 @@ alias Ceres.Storage.S3
     end
   end
 
-  defp convert_files(_basepath, [], parent_pid, chapter_id), do: send(parent_pid, {:finished})
+  defp convert_files(basepath, [], parent_pid, _chapter_id) do
+    send(parent_pid, {:finished})
+  end
 
-  defp convert_files(basepath, [{ref, path, size} | tail], parent_pid, chapter_id) do
+  defp convert_files(basepath, [{ref, path, _size} | tail], parent_pid, chapter_id) do
     case File.regular?(path) do
       true ->
         new_name = "#{basepath}/#{Path.basename(Path.rootname(path))}.avif"

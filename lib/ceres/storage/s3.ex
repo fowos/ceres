@@ -5,7 +5,7 @@ defmodule Ceres.Storage.S3 do
 
   require Logger
 
-  @bucket "comics:"
+
 
   @doc """
   Upload image to s3
@@ -26,12 +26,12 @@ defmodule Ceres.Storage.S3 do
   end
 
   @spec remove_image_from_s3(String.t()) :: :ok | :error
-  def remove_image_from_s3(@bucket <> path) do
+  def remove_image_from_s3("comics:" <> path) do
     IO.inspect(path, label: "path")
 
     case S3.delete_object("comics", path) |> ExAws.request do
       {:ok, _} ->
-        Logger.debug("Removed #{@bucket <> path} from s3")
+        Logger.debug("Removed #{"comics:" <> path} from s3")
         :ok
       {:error, error} ->
         Logger.error("Error while removing #{path} from s3. Error: #{inspect(error)}")

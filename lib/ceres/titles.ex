@@ -4,6 +4,7 @@ defmodule Ceres.Titles do
   """
 
   import Ecto.Query, warn: false
+  alias Ceres.Titles.Page
   alias Ceres.Repo
 
   alias Ceres.Titles.Title
@@ -215,6 +216,12 @@ defmodule Ceres.Titles do
     Repo.all(Chapter)
   end
 
+  def list_pages_by_chapter_id(chapter_id) do
+    Repo.all(from p in Page, where: p.chapter_id == ^chapter_id)
+  end
+
+
+
   @doc """
   Gets a single chapter.
 
@@ -403,5 +410,32 @@ defmodule Ceres.Titles do
   """
   def get_comics_chapters(comics_id) do
     Repo.all(from c in Chapter, where: c.comic_id == ^comics_id)
+  end
+
+
+  @doc """
+  Get all comics by part name
+
+  ## Examples
+
+      iex> get_comics_list_by_part_name(partname)
+      [%Comic{} | term()]
+  """
+  def get_comics_list_by_part_name(partname, preloads) do
+    from(c in Comic, where: ilike(c.name, ^"%#{partname}%"), preload: ^preloads)
+    |> Repo.all()
+  end
+
+
+  @doc """
+  Get all titles by part name
+
+  ## Examples
+
+      iex> get_titles_list_by_part_name(partname)
+      [%Title{} | term()]
+  """
+  def get_titles_list_by_part_name(partname, preloads \\ []) do
+    Repo.all(from c in Title, where: ilike(c.original_name, ^"%#{partname}%"), preload: ^preloads)
   end
 end

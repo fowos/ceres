@@ -1,4 +1,4 @@
-defmodule CeresWeb.FileController.FileController do
+defmodule CeresWeb.Api.Images.ImageController do
   @moduledoc """
   This module contains functions for downloading images from S3 storage.
   """

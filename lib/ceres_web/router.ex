@@ -27,7 +27,13 @@ scope "/", CeresWeb do
   scope "/api", CeresWeb do
     pipe_through :api
 
-    get "/files/*key", FileController.FileController, :download
+    get "/image/*key", Api.Images.ImageController, :download
+
+    get "/comics/:name", Api.Comics.ComicsController, :index
+    get "/comics", Api.Comics.ComicsController, :index
+
+
+    get "/pages/:id", Api.Pages.PagesController, :index
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

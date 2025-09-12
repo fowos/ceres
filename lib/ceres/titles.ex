@@ -216,8 +216,18 @@ defmodule Ceres.Titles do
     Repo.all(Chapter)
   end
 
+
+  @doc """
+  Returns the list of pages for a chapter.
+
+  ## Examples
+
+      iex> list_pages_by_chapter_id("uuid-chapter-id")
+      [%Page{}, ...]
+  """
+  @spec list_pages_by_chapter_id(String.t()) :: [Ceres.Titles.Page.t() | term()]
   def list_pages_by_chapter_id(chapter_id) do
-    Repo.all(from p in Page, where: p.chapter_id == ^chapter_id)
+    Repo.all(from p in Page, where: p.chapter_id == ^chapter_id, order_by: p.number)
   end
 
 

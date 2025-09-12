@@ -8,10 +8,14 @@ defmodule CeresWeb.Chapters.ChapterView do
 
   @impl Phoenix.LiveView
   def mount(%{"id" => id}, _session, socket) do
-    chapter = Titles.get_chapter!(id) |> Repo.preload(:pages)
+    pages = Titles.list_pages_by_chapter_id(id)
+    chapter = Titles.get_chapter!(id)
+    comic = Titles.get_comic!(chapter.comic_id)
 
     socket = socket
     |> assign(:chapter, chapter)
+    |> assign(:comic, comic)
+    |> assign(:pages, pages)
 
     {:ok, socket}
   end

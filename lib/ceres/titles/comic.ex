@@ -23,6 +23,6 @@ defmodule Ceres.Titles.Comic do
   def changeset(comic, attrs) do
     comic
     |> cast(attrs, [:name, :description, :language, :title_id])
-    |> validate_required([:name, :description, :language, :title_id])
+    |> validate_required([:name, :language, :title_id])
   end
 end

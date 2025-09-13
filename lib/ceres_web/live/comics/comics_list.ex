@@ -23,7 +23,7 @@ defmodule CeresWeb.Comics.ComicsList do
       {:ok, _} ->
         {:noreply, stream_delete(socket, :comics, comic)}
       {:error, changeset} ->
-        Logger.error("Error while deleting comic. \n #{inspect(changeset)}")
+        Logger.error("Error while deleting comic. \n#{inspect(changeset)}")
         {:noreply, socket}
     end
   end

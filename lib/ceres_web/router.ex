@@ -15,12 +15,16 @@ defmodule CeresWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug Plug.Parsers,
+      parsers: [:urlencoded, :multipart, :json],
+      pass: ["*/*"],
+      json_decoder: Phoenix.json_library()
   end
 
-scope "/", CeresWeb do
-  pipe_through :browser
+  scope "/", CeresWeb do
+    pipe_through :browser
 
-  get "/", PageController, :home
+    get "/", PageController, :home
   end
 
   # Other scopes may use custom stacks.
@@ -31,9 +35,12 @@ scope "/", CeresWeb do
 
     get "/comics/:name", Api.Comics.ComicsController, :index
     get "/comics", Api.Comics.ComicsController, :index
+    post "/comics", Api.Comics.ComicsController, :by_params
 
 
     get "/pages/:id", Api.Pages.PagesController, :index
+
+    get "/tags", Api.Tags.TagsController, :index
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

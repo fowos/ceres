@@ -1,4 +1,6 @@
 defmodule CeresWeb.Chapters.ChaptersNew do
+alias Ceres.Titles.Page
+alias Ceres.Storage.S3
 alias Ceres.Storage.Converter
   use CeresWeb, :live_view
 
@@ -41,9 +43,9 @@ alias Ceres.Storage.Converter
     }
 
     with {:ok, %Chapter{} = chapter} <- Titles.create_chapter(chapter) |> IO.inspect(label: "chapter"),
-        {:ok, _path} <- parse_zip_chapter(socket, chapter)
+        {:ok, tmpdir} <- parse_zip_chapter(socket, chapter)
       do
-        convert_images(chapter)
+        convert_images(tmpdir, chapter.id)  # TODO
 
         {:noreply, socket |> assign(:created_chapter_id, chapter.id)}
       else
@@ -61,13 +63,15 @@ alias Ceres.Storage.Converter
 
   defp parse_zip_chapter(socket, %Chapter{} = chapter) do
     path = consume_uploaded_entries(socket, :chapter_zip, fn %{path: path}, _entry ->
+      tmpdir = upload_tmpdir()
 
-      dest = String.to_charlist(get_path_to_uploads(chapter.comic_id, chapter.volume, chapter.number))
+      dest = String.to_charlist(tmpdir)
+
       with {:ok, binary} <- File.read(path),
            {:ok, _files} <- :zip.unzip(binary, [{:cwd, dest}])
       do
 
-        {:ok, "priv/static/uploads/#{chapter.comic_id}"}
+        {:ok, tmpdir}
       else
         other ->
           raise "Error while unzipping chapter. \n#{inspect(other)}"
@@ -81,21 +85,69 @@ alias Ceres.Storage.Converter
     end
   end
 
-  defp convert_images(%Chapter{} = chapter) do
+  defp convert_images(basedir, chapter_id) do
     pid = self()
     Task.start(fn ->
-      Converter.dir_to_avif(
-        get_path_to_uploads(chapter.comic_id, chapter.volume, chapter.number),
-        pid,
-        chapter.id)
+      converted_files = Converter.get_files(basedir)
+      |> IO.inspect(label: "files")
+      |> sendfiles(pid)
+      |> Converter.convert_files_to_avif(pid)
+
+      if Enum.any?(converted_files, fn {status, _ref, _index, _path} -> status == :error end) do
+        send(pid, {:error, "Error while converting images. Directory will be removed."})
+        Logger.error("Error while converting images. Directory #{basedir} will be removed.")
+        File.rm_rf!(basedir)
+      end
+
+      converted_files
+      |> save_pages(chapter_id, pid)
+
+      File.rm_rf!(basedir)
     end)
   end
 
-  defp get_path_to_uploads(comic_id, volume, number), do: "priv/static/uploads/#{comic_id}/#{volume}-#{number}"
+  @doc """
+  Just send file list in view process
+  """
+  @spec sendfiles([{reference(), String.t(), integer()}], pid()) :: any()
+  defp sendfiles(files, pid) do
+    send(pid, {:started, files})
+    files
+  end
+
+
+  defp save_pages(converted_files, chapter_id, view_pid) do
+    for {status, ref, index, path} <- converted_files do
+      if status != :ok, do: raise "Error, status is #{status}"
+
+      s3_dest = "#{chapter_id}/#{index}.avif"
+
+      case Titles.create_page(%{chapter_id: chapter_id, number: index, source: s3_dest}) do
+        {:ok, %Page{} = page} ->
+          S3.upload_to_s3(path, s3_dest)
+          send(view_pid, {:saved, ref})
+
+        other -> raise "Error while creating page. #{inspect(other)}"
+      end
+    end
+  end
+
+  @doc """
+  Generate path to basedir for uploaded images
+  """
+  defp upload_tmpdir, do: "#{System.tmp_dir!}/#{generate_id()}"
+
+
+  defp generate_id(length \\ 24) do
+    :crypto.strong_rand_bytes(length)
+    |> Base.url_encode64()
+    |> String.replace(~r/[-_]/, "")
+    |> String.slice(0, length)
+  end
 
   @impl Phoenix.LiveView
   def handle_info({:started, files}, socket) do
-    pages = Enum.map(files, fn {ref, path, size} ->
+    pages = Enum.map(files, fn {ref, path, size, index} ->
       %{id: :erlang.ref_to_list(ref), path: path, size: format_bytes(size), new_size: nil, is_converted: false, s3: false}
     end)
 
@@ -111,7 +163,7 @@ alias Ceres.Storage.Converter
     Titles.get_chapter!(socket.assigns.created_chapter_id)
     |> Titles.delete_chapter()
 
-    {:noreply, socket |> put_flash(:error, "Error while creating chapter. #{inspect(error)}")}
+    {:noreply, socket |> put_flash(:error, "Error while creating chapter. \n#{inspect(error)}")}
   end
 
   @doc """

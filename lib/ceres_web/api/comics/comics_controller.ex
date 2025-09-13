@@ -46,14 +46,11 @@ defmodule CeresWeb.Api.Comics.ComicsController do
     |> search_by_publishers(params["publishers"])
     |> search_by_authors(params["authors"])
     |> Repo.all()
-    |> IO.inspect(label: "comics")
     |> Repo.preload([comics: [:localizers, :chapters, title: [:authors, :publishers, :tags]]])
     |> Enum.map(fn title -> title.comics end)
     |> Enum.reduce([], fn comics, acc -> comics ++ acc end)
     |> Enum.uniq()
 
-
-    # comics = Titles.list_comics() |> Repo.preload([:localizers, :chapters, title: [:authors, :publishers, :tags]])
     render(conn, :index, comics: comics)
   end
 
@@ -87,6 +84,5 @@ defmodule CeresWeb.Api.Comics.ComicsController do
         [t, authors_titles: _at, author: a],
         sum(fragment("CASE WHEN ? = ANY(?) THEN 1 ELSE 0 END", a.name, ^authors)) == ^length(authors)
       )
-
   end
 end

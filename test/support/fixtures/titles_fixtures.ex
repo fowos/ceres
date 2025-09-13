@@ -69,4 +69,18 @@ defmodule Ceres.TitlesFixtures do
 
     page
   end
+
+  @doc """
+  Generate a cover.
+  """
+  def cover_fixture(attrs \\ %{}) do
+    {:ok, cover} =
+      attrs
+      |> Enum.into(%{
+        source: "some source"
+      })
+      |> Ceres.Titles.create_cover()
+
+    cover
+  end
 end

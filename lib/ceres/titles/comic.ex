@@ -11,8 +11,9 @@ defmodule Ceres.Titles.Comic do
 
     belongs_to :title, Ceres.Titles.Title, type: :binary_id
 
-    has_many :chapters, Ceres.Titles.Chapter
+    has_one :cover, Ceres.Titles.Cover
 
+    has_many :chapters, Ceres.Titles.Chapter
     has_many :localizers_comics, Ceres.Localizers.LocalizersComics
     has_many :localizers, through: [:localizers_comics, :localizer]
 

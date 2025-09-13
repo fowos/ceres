@@ -448,4 +448,113 @@ defmodule Ceres.Titles do
   def get_titles_list_by_part_name(partname, preloads \\ []) do
     Repo.all(from c in Title, where: ilike(c.original_name, ^"%#{partname}%"), preload: ^preloads)
   end
+
+  alias Ceres.Titles.Cover
+
+  @doc """
+  Returns the list of covers.
+
+  ## Examples
+
+      iex> list_covers()
+      [%Cover{}, ...]
+
+  """
+  def list_covers do
+    Repo.all(Cover)
+  end
+
+  @doc """
+  Gets a single cover.
+
+  Raises `Ecto.NoResultsError` if the Cover does not exist.
+
+  ## Examples
+
+      iex> get_cover!(123)
+      %Cover{}
+
+      iex> get_cover!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_cover!(id), do: Repo.get!(Cover, id)
+
+  @doc """
+  Creates a cover.
+
+  ## Examples
+
+      iex> create_cover(%{field: value})
+      {:ok, %Cover{}}
+
+      iex> create_cover(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_cover(attrs) do
+    %Cover{}
+    |> Cover.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a cover.
+
+  ## Examples
+
+      iex> update_cover(cover, %{field: new_value})
+      {:ok, %Cover{}}
+
+      iex> update_cover(cover, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_cover(%Cover{} = cover, attrs) do
+    cover
+    |> Cover.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a cover.
+
+  ## Examples
+
+      iex> delete_cover(cover)
+      {:ok, %Cover{}}
+
+      iex> delete_cover(cover)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_cover(%Cover{} = cover) do
+    Repo.delete(cover)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking cover changes.
+
+  ## Examples
+
+      iex> change_cover(cover)
+      %Ecto.Changeset{data: %Cover{}}
+
+  """
+  def change_cover(%Cover{} = cover, attrs \\ %{}) do
+    Cover.changeset(cover, attrs)
+  end
+
+  @doc """
+  Get cover by comic id
+
+  ## Examples
+
+      iex> get_cover_by_comic_id(comic_id)
+      %Cover{} | term() | nil
+  """
+  @spec get_cover_by_comic_id(String.t()) :: Cover.t() | term() | nil
+  def get_cover_by_comic_id(comic_id) do
+    Repo.one(from c in Cover, where: c.comic_id == ^comic_id)
+  end
 end

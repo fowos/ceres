@@ -39,4 +39,28 @@ defmodule Ceres.Storage.S3 do
         :error
     end
   end
+
+
+
+
+
+  @doc """
+  Upload image to s3 in 'comics' bucket
+
+  ## Examples
+
+      iex> upload_to_s3("path/to/file", "s3/path/to/file")
+      :ok | :error
+  """
+  @spec upload_to_s3(String.t(), String.t()) :: :ok | :error
+  def upload_to_s3(file, s3_dest) do
+    case S3.put_object("comics", s3_dest, File.read!(file)) |> ExAws.request do
+      {:ok, _} ->
+        Logger.debug("Uploaded #{file} to s3")
+        :ok
+      {:error, error} ->
+        Logger.error("Error while uploading #{file} to s3. Error: #{inspect(error)}")
+        :error
+    end
+  end
 end

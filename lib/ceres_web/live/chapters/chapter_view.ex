@@ -21,6 +21,6 @@ defmodule CeresWeb.Chapters.ChapterView do
   end
 
 
-  def parse_image_source("comics:" <> source), do: "/api/image/" <> source
-  def parse_image_source(source), do: raise "Invalid image source: #{source}"
+  def parse_image_source(source), do: "/api/image/" <> source
+  # def parse_image_source(source), do: raise "Invalid image source: #{source}"
 end

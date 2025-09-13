@@ -6,6 +6,7 @@
       </.header>
       <div class="badge badge-info mx-auto p-4 text-xl">Preview</div>
       <%= for page <- @pages do %>
+        {page.source}
         <image class="rounded-md shadow-xl" src={parse_image_source(page.source)}/>
       <% end %>
     </div>

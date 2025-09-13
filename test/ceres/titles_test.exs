@@ -262,4 +262,58 @@ defmodule Ceres.TitlesTest do
       assert %Ecto.Changeset{} = Titles.change_page(page)
     end
   end
+
+  describe "covers" do
+    alias Ceres.Titles.Cover
+
+    import Ceres.TitlesFixtures
+
+    @invalid_attrs %{source: nil}
+
+    test "list_covers/0 returns all covers" do
+      cover = cover_fixture()
+      assert Titles.list_covers() == [cover]
+    end
+
+    test "get_cover!/1 returns the cover with given id" do
+      cover = cover_fixture()
+      assert Titles.get_cover!(cover.id) == cover
+    end
+
+    test "create_cover/1 with valid data creates a cover" do
+      valid_attrs = %{source: "some source"}
+
+      assert {:ok, %Cover{} = cover} = Titles.create_cover(valid_attrs)
+      assert cover.source == "some source"
+    end
+
+    test "create_cover/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Titles.create_cover(@invalid_attrs)
+    end
+
+    test "update_cover/2 with valid data updates the cover" do
+      cover = cover_fixture()
+      update_attrs = %{source: "some updated source"}
+
+      assert {:ok, %Cover{} = cover} = Titles.update_cover(cover, update_attrs)
+      assert cover.source == "some updated source"
+    end
+
+    test "update_cover/2 with invalid data returns error changeset" do
+      cover = cover_fixture()
+      assert {:error, %Ecto.Changeset{}} = Titles.update_cover(cover, @invalid_attrs)
+      assert cover == Titles.get_cover!(cover.id)
+    end
+
+    test "delete_cover/1 deletes the cover" do
+      cover = cover_fixture()
+      assert {:ok, %Cover{}} = Titles.delete_cover(cover)
+      assert_raise Ecto.NoResultsError, fn -> Titles.get_cover!(cover.id) end
+    end
+
+    test "change_cover/1 returns a cover changeset" do
+      cover = cover_fixture()
+      assert %Ecto.Changeset{} = Titles.change_cover(cover)
+    end
+  end
 end

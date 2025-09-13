@@ -21,6 +21,27 @@ defmodule Ceres.Tags do
     Repo.all(Tag)
   end
 
+
+  @doc """
+  Returns the list of tags ordered by title count.
+
+  ## Examples
+
+      iex> list_tags_order_by_title_count()
+      [%Tag{} | term()]
+  """
+  @spec list_tags_order_by_title_count() :: [Ceres.Tags.Tag.t() | term()]
+  def list_tags_order_by_title_count do
+    query =
+      from t in Ceres.Tags.Tag,
+      left_join: tt in Ceres.Tags.TitlesTags, on: tt.tag_id == t.id,
+      group_by: t.id,
+      order_by: [desc: count(tt.title_id)],
+      select_merge: %{titles_count: count(tt.title_id)}
+
+    Repo.all(query)
+  end
+
   @doc """
   Gets a single tag.
 

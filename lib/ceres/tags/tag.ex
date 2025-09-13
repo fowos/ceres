@@ -8,6 +8,7 @@ defmodule Ceres.Tags.Tag do
     field :name, :string
 
     many_to_many :titles, Ceres.Titles.Title, join_through: Ceres.Tags.TitlesTags
+    field :titles_count, :integer, virtual: true
 
     timestamps(type: :utc_datetime)
   end

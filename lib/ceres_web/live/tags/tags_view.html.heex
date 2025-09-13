@@ -1,0 +1,50 @@
+<Layouts.app flash={@flash}>
+
+  <div class="w-full flex flex-col gap-4 rounded-lg mb-4">
+    <.header>
+      Tags page
+      <:subtitle>
+        On this page you can see your tags and statistics about them
+      </:subtitle>
+    </.header>
+
+
+    <div class="overflow-x-auto">
+      <.table
+        id="tags"
+        rows={@streams.tags}
+      >
+        <%!-- <:col :let={{_id, tag}} label="Name">{tag.name}</:col> --%>
+        <:col :let={{_id, tag}} label="Name">
+          <.form
+            for={%{"id" => tag.id, "name" => tag.name}}
+            as={:tag}
+            phx-submit="rename-tag"
+          >
+            <input type="hidden" name="tag[id]" value={tag.id} />
+            <input
+              type="text"
+              name="tag[name]"
+              value={tag.name}
+              class="input input-bordered"
+            />
+            <button type="submit" class="btn btn-primary btn-soft ml-2">Save</button>
+          </.form>
+        </:col>
+
+        <:col :let={{_id, tag}} label="Titles">{tag.titles_count}</:col>
+
+        <:action :let={{_id, tag}}>
+          <.button
+            class="btn btn-error btn-soft rounded-lg"
+            phx-click="delete-tag"
+            phx-value-id={tag.id}
+            data-confirm="Are you sure?"
+          >
+            <.icon name="hero-trash" class="size-5"></.icon>
+          </.button>
+        </:action>
+      </.table>
+    </div>
+  </div>
+</Layouts.app>

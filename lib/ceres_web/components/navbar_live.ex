@@ -21,7 +21,7 @@ defmodule CeresWeb.Components.NavbarLive do
             class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
             navigate={~p"/titles"}
           >
-            <.icon name="hero-queue-list" class="size-6" />
+            <.icon name="hero-queue-list" class="size-6 me-2" />
             Titles
           </.link>
         </div>
@@ -31,8 +31,18 @@ defmodule CeresWeb.Components.NavbarLive do
             class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
             navigate={~p"/comics"}
           >
-            <.icon name="hero-document" class="size-6" />
+            <.icon name="hero-document" class="size-6 me-2" />
             Comics
+          </.link>
+        </div>
+
+        <div class="text-base-content hover:text-primary duration-300">
+          <.link
+            class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
+            navigate={~p"/tags"}
+          >
+            <.icon name="hero-tag" class="size-6 me-2" />
+            Tags
           </.link>
         </div>
       </div>

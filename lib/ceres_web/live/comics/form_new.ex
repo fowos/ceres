@@ -7,8 +7,16 @@ defmodule CeresWeb.Comics.FormNew do
   @language_options [{"English", :en}, {"Japanese", :jp}, {"Korean", :kr}, {"Chinese", :cn}, {"Russian", :ru}]
 
   @impl Phoenix.LiveView
-  def mount(_params, _session, socket) do
-    comic = %Comic{}
+  def mount(params, _session, socket) do
+    IO.inspect(params, label: "params")
+
+    comic = case params["id"] do
+      nil ->
+        %Comic{}
+      id ->
+        %Comic{title_id: id}
+    end
+
 
     socket = socket
     |> assign(:language_options, @language_options)

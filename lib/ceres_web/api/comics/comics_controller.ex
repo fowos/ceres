@@ -46,6 +46,7 @@ defmodule CeresWeb.Api.Comics.ComicsController do
     |> search_by_publishers(params["publishers"])
     |> search_by_authors(params["authors"])
     |> Repo.all()
+    |> IO.inspect(label: "comics")
     |> Repo.preload([comics: [:localizers, :chapters, title: [:authors, :publishers, :tags]]])
     |> Enum.map(fn title -> title.comics end)
     |> Enum.reduce([], fn comics, acc -> comics ++ acc end)
@@ -83,9 +84,9 @@ defmodule CeresWeb.Api.Comics.ComicsController do
     |> join(:inner, [authors_titles: at], a in assoc(at, :author), as: :author)
     |> group_by([t], t.id)
     |> having(
-      [t, authors_titles: _at, author: a],
-      count(a.id) == ^authors_count and
-      sum(fragment("CASE WHEN ? = ANY(?) THEN 1 ELSE 0 END", a.name, ^authors)) == ^authors_count
-    )
+        [t, authors_titles: _at, author: a],
+        sum(fragment("CASE WHEN ? = ANY(?) THEN 1 ELSE 0 END", a.name, ^authors)) == ^length(authors)
+      )
+
   end
 end

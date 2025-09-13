@@ -15,10 +15,7 @@ defmodule CeresWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-    plug Plug.Parsers,
-      parsers: [:urlencoded, :multipart, :json],
-      pass: ["*/*"],
-      json_decoder: Phoenix.json_library()
+
   end
 
   scope "/", CeresWeb do

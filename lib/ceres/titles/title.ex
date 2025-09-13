@@ -13,9 +13,6 @@ defmodule Ceres.Titles.Title do
     has_many :authors_titles, Ceres.Authors.AuthorsTitles
     has_many :authors, through: [:authors_titles, :author]
 
-    # has_many :publishers_titles, Ceres.Authors.PublishersTitles
-    # has_many :publishers, through: [:publishers_titles, :publisher]
-
     many_to_many :publishers, Ceres.Authors.Publisher, join_through: Ceres.Authors.PublishersTitles
     many_to_many :tags, Ceres.Tags.Tag, join_through: Ceres.Tags.TitlesTags
 

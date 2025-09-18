@@ -1,0 +1,21 @@
+<div class="flex flex-col gap-4">
+  <.header>Set comic cover</.header>
+
+  <.form id="cover-form" phx-submit="submit-cover" phx-target={@myself}>
+    <.live_file_input
+    phx-change="validate-cover"
+    phx-submit="submit-cover"
+    class="w-full bg-base-100 p-2 mb-4 rounded-md"
+    upload={@uploads.cover} />
+
+    <footer>
+      <.button phx-disable-with="Saving..." variant="primary">Save</.button>
+    </footer>
+  </.form>
+
+  <%= if @comic.cover do %>
+    <div class="flex flex-col md:flex-row bg-base-100 p-4 rounded-lg justify-center">
+      <image class="rounded-md shadow-xl max-w-sm" src={parse_image_source(@comic.cover.source)}/>
+    </div>
+  <% end %>
+</div>

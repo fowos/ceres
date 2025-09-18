@@ -19,7 +19,8 @@ defmodule CeresWeb.Api.Comics.ComicsJSON do
       chapters: chapters(comic),
       publishers: publishers(comic),
       authors: authors(comic),
-      tags: tags(comic)
+      tags: tags(comic),
+      cover: cover(comic)
     }
   end
 
@@ -70,6 +71,16 @@ defmodule CeresWeb.Api.Comics.ComicsJSON do
         name: tag.name,
       }
     end)
+  end
+
+  defp cover(%Comic{} = comic) do
+    case comic.cover do
+      nil -> %{}
+      cover -> %{
+        id: cover.id,
+        source: cover.source
+      }
+    end
   end
 
 

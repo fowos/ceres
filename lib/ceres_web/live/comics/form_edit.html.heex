@@ -2,9 +2,13 @@
     <div class="w-full flex flex-col gap-4 lg:gap-8 bg-base-200 rounded-lg mb-4 max-w-5xl mx-auto w-full">
 
       <div>
-        <.form for={@form} id="title-form" phx-change="validate" phx-submit="save">
+        <.form
+          id="title-form"
+          for={@form}
+          phx-change="validate"
+          phx-submit="save"
+        >
           <.header>Edit comic params</.header>
-
           <.input field={@form[:name]} phx-debounce="400"  type="textarea" label="Name"/>
           <.input field={@form[:title_id]} phx-debounce="400" type="text" label="Title ID"/>
           <.input field={@form[:description]} phx-debounce="400" type="textarea" label="Description"/>
@@ -14,6 +18,16 @@
             <.button phx-disable-with="Saving..." variant="primary">Save</.button>
           </footer>
         </.form>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <.live_component
+          module={CeresWeb.Comics.Components.Cover}
+          id="cover-form"
+          comic={@comic}
+        />
       </div>
 
       <div class="divider"></div>

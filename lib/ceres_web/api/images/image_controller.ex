@@ -6,15 +6,15 @@ defmodule CeresWeb.Api.Images.ImageController do
 
   alias ExAws.S3
 
-  @bucket "comics"
-
   @doc """
   Download image from S3 storage
   """
   def download(conn, %{"key" => key_parts}) do
-    key = Enum.join(key_parts, "/")
+    [bucket, key] =
+      Enum.join(key_parts, "/")
+      |> String.split(":")
 
-    stream = S3.get_object(@bucket, key)
+    stream = S3.get_object(bucket, key)
     |> ExAws.request!()
     |> Map.fetch!(:body)
 

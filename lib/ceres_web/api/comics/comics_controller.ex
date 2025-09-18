@@ -28,7 +28,7 @@ defmodule CeresWeb.Api.Comics.ComicsController do
     |> Enum.uniq()
 
 
-    comics = Repo.preload(comics, [title: [:authors, :publishers, :tags]])
+    comics = Repo.preload(comics, [:cover, title: [:authors, :publishers, :tags]])
 
     render(conn, :index, comics: comics)
   end
@@ -36,7 +36,7 @@ defmodule CeresWeb.Api.Comics.ComicsController do
 
   def index(conn, params) do
     IO.inspect(params, label: "params")
-    comics = Titles.list_comics() |> Repo.preload([:localizers, :chapters, title: [:authors, :publishers, :tags]])
+    comics = Titles.list_comics() |> Repo.preload([:localizers, :chapters, :cover, title: [:authors, :publishers, :tags]])
     render(conn, :index, comics: comics)
   end
 
@@ -46,7 +46,7 @@ defmodule CeresWeb.Api.Comics.ComicsController do
     |> search_by_publishers(params["publishers"])
     |> search_by_authors(params["authors"])
     |> Repo.all()
-    |> Repo.preload([comics: [:localizers, :chapters, title: [:authors, :publishers, :tags]]])
+    |> Repo.preload([comics: [:localizers, :chapters, :cover, title: [:authors, :publishers, :tags]]])
     |> Enum.map(fn title -> title.comics end)
     |> Enum.reduce([], fn comics, acc -> comics ++ acc end)
     |> Enum.uniq()

@@ -20,7 +20,5 @@ defmodule CeresWeb.Chapters.ChapterView do
     {:ok, socket}
   end
 
-
   def parse_image_source(source), do: "/api/image/" <> source
-  # def parse_image_source(source), do: raise "Invalid image source: #{source}"
 end

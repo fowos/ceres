@@ -1,13 +1,15 @@
 defmodule CeresWeb.Chapters.ChaptersNew do
-alias Ceres.Titles.Page
-alias Ceres.Storage.S3
-alias Ceres.Storage.Converter
   use CeresWeb, :live_view
 
   alias Ceres.Titles.Chapter
   alias Ceres.Titles
+  alias Ceres.Titles.Page
+  alias Ceres.Storage.S3
+  alias Ceres.Storage.Converter
 
   require Logger
+
+  @bucket "comics"
 
   @impl Phoenix.LiveView
   def mount(%{"id" => id}, _session, socket) do
@@ -89,7 +91,6 @@ alias Ceres.Storage.Converter
     pid = self()
     Task.start(fn ->
       converted_files = Converter.get_files(basedir)
-      |> IO.inspect(label: "files")
       |> sendfiles(pid)
       |> Converter.convert_files_to_avif(pid)
 
@@ -109,7 +110,7 @@ alias Ceres.Storage.Converter
   @doc """
   Just send file list in view process
   """
-  @spec sendfiles([{reference(), String.t(), integer()}], pid()) :: any()
+  @spec sendfiles([{reference(), String.t(), integer(), integer()}], pid()) :: any()
   defp sendfiles(files, pid) do
     send(pid, {:started, files})
     files
@@ -122,9 +123,9 @@ alias Ceres.Storage.Converter
 
       s3_dest = "#{chapter_id}/#{index}.avif"
 
-      case Titles.create_page(%{chapter_id: chapter_id, number: index, source: s3_dest}) do
+      case Titles.create_page(%{chapter_id: chapter_id, number: index, source: "#{@bucket}:#{s3_dest}"}) do
         {:ok, %Page{} = page} ->
-          S3.upload_to_s3(path, s3_dest)
+          S3.upload_to_s3(@bucket, path, s3_dest)
           send(view_pid, {:saved, ref})
 
         other -> raise "Error while creating page. #{inspect(other)}"

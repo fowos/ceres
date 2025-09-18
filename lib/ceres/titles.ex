@@ -464,6 +464,7 @@ defmodule Ceres.Titles do
     Repo.all(Cover)
   end
 
+
   @doc """
   Gets a single cover.
 

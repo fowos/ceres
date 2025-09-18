@@ -29,7 +29,7 @@ alias Ceres.Storage.S3
       [{:ok, ref, index, path} | {:error, ref, index, error}]
   """
 
-  @spec convert_files_to_avif([{reference(), String.t(), integer()}], pid())
+  @spec convert_files_to_avif([{reference(), String.t(), integer()}], pid() | nil)
     :: [{:ok, reference(), integer(), String.t()} | {:error, reference(), integer(), String.t()}]
 
   def convert_files_to_avif(files, view_pid) do
@@ -55,11 +55,11 @@ alias Ceres.Storage.S3
   defp image_to_avif({:file, ref, index, from, dest}, view_pid) do
     case System.cmd("ffmpeg", ["-i", from, "-c:v", "libaom-av1", "-still-picture", "1", "-crf", "20", "-b:v", "0", "-hide_banner", "-loglevel", "error", dest]) do
       {_output, 0} ->
-        send(view_pid, {:converted, {ref, File.stat!(dest).size}})
+        response({:converted, {ref, File.stat!(dest).size}}, view_pid)
         {:ok, ref, index, dest}
       {output, _} ->
         Logger.error("Error while converting #{from}. Output: #{output}")
-        send(view_pid, {:error, "Error while converting #{from}. Please check server logs."})
+        response({:error, "Error while converting #{from}. Please check server logs."}, view_pid)
         {:error, ref, index, output}
     end
   end
@@ -70,5 +70,9 @@ alias Ceres.Storage.S3
     |> Base.url_encode64()
     |> String.replace(~r/[-_]/, "")
     |> String.slice(0, length)
+  end
+
+  defp response(data, pid \\ nil) do
+    if pid, do: send(pid, data)
   end
 end

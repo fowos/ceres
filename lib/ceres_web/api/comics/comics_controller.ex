@@ -15,8 +15,6 @@ defmodule CeresWeb.Api.Comics.ComicsController do
   Finc comics by part name
   """
   def index(conn, %{"name" => name}) do
-
-    IO.puts("index 1")
     comics = Titles.get_comics_list_by_part_name(name, [:localizers, :chapters])
 
     titles_comics = Titles.get_titles_list_by_part_name(name, [comics: [:localizers, :chapters]])
@@ -35,8 +33,8 @@ defmodule CeresWeb.Api.Comics.ComicsController do
 
 
   def index(conn, params) do
-    IO.inspect(params, label: "params")
-    comics = Titles.list_comics() |> Repo.preload([:localizers, :chapters, :cover, title: [:authors, :publishers, :tags]])
+    comics = Titles.list_comics()
+    |> Repo.preload([:localizers, :chapters, :cover, title: [:authors, :publishers, :tags]])
     render(conn, :index, comics: comics)
   end
 

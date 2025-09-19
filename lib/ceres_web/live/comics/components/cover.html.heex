@@ -1,21 +1,31 @@
-<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-4 max-w-md">
   <.header>Set comic cover</.header>
 
   <.form id="cover-form" phx-submit="submit-cover" phx-target={@myself}>
+    <div class="h-full">
+      <%= if @comic.cover do %>
+        <div class="mx-auto">
+          <img class="rounded-md shadow-xl w-64 h-64 object-cover object-center" src={parse_image_source(@comic.cover.source)}/>
+        </div>
+      <% else %>
+        <div>
+          <div class="skeleton w-64 h-64 flex items-center justify-center">
+            <p class="">Cover not found</p>
+          </div>
+        </div>
+      <% end %>
+      </div>
+
+
     <.live_file_input
-    phx-change="validate-cover"
-    phx-submit="submit-cover"
-    class="w-full bg-base-100 p-2 mb-4 rounded-md"
-    upload={@uploads.cover} />
+      phx-change="validate-cover"
+      phx-submit="submit-cover"
+      class="bg-base-100 p-2 my-4 rounded-md"
+      upload={@uploads.cover} />
+
 
     <footer>
       <.button phx-disable-with="Saving..." variant="primary">Save</.button>
     </footer>
   </.form>
-
-  <%= if @comic.cover do %>
-    <div class="flex flex-col md:flex-row bg-base-100 p-4 rounded-lg justify-center">
-      <image class="rounded-md shadow-xl max-w-sm" src={parse_image_source(@comic.cover.source)}/>
-    </div>
-  <% end %>
 </div>

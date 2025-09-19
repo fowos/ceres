@@ -20,6 +20,13 @@
         id="titles"
         rows={@streams.comics}
       >
+        <:col :let={{_id, comic}} label="Cover">
+          <%= if comic.cover do %>
+            <image class="rounded-lg shadow-xl w-20 h-20 object-cover object-center" src={~p"/api/image/#{comic.cover.source}"}/>
+          <% else %>
+            <div class="skeleton w-20 h-20 shadow-xl rounded-lg"></div>
+          <% end %>
+        </:col>
         <:col :let={{_id, comic}} label="Name">{comic.name}</:col>
         <:col :let={{_id, comic}} label="Title">{comic.title_id}</:col>
         <:col :let={{_id, comic}} label="Description">{localizers_names(comic.localizers)}</:col>

@@ -27,36 +27,18 @@
       </.form>
 
 
-      <div :if={@pages != []}>
-        <.table
-          id="pages"
-          rows={@pages}
-        >
-          <:col :let={page} label="Temp path">{page.path}</:col>
+      <div :if={@status == :ok} class="p-4 mx-auto w-full text-center text-success-content">
+        <span class="font-semibold bg-success p-4 rounded-lg">
+          <.icon name="hero-x-mark" class=" size-6"/>
+          {parse_status(@status)}
+        </span>
+      </div>
 
-          <:col :let={page} label="Old size">{page.size}</:col>
-
-          <:col :let={page} label="AVIF size">
-            <span class="font-semibold">{page.new_size}</span>
-          </:col>
-
-          <:col :let={page} label="AVIF">
-            <%= if page.is_converted do %>
-              <.icon name="hero-check-circle" class="text-success size-5"/>
-            <% else %>
-              <.icon name="hero-x-mark" class="text-error size-5"/>
-            <% end %>
-          </:col>
-
-          <:col :let={page} label="S3">
-            <%= if page.s3 do %>
-              <.icon name="hero-check-circle" class="text-success size-5"/>
-            <% else %>
-              <.icon name="hero-x-mark" class="text-error size-5"/>
-            <% end %>
-          </:col>
-        </.table>
-
+      <div :if={@status == :error} class="p-4 mx-auto w-full text-center text-error-content">
+        <span class="font-semibold bg-error p-4 rounded-lg">
+          <.icon name="hero-x-mark" class=" size-6"/>
+          {parse_status(@status)}
+        </span>
       </div>
 
 

@@ -1,4 +1,6 @@
 defmodule CeresWeb.Api.Comics.ComicsController do
+  require Logger
+  alias Ceres.Localizers
   alias Ceres.Titles.Title
   alias Ceres.Repo
   alias Ceres.Titles
@@ -26,7 +28,7 @@ defmodule CeresWeb.Api.Comics.ComicsController do
     |> Enum.uniq()
 
 
-    comics = Repo.preload(comics, [:cover, title: [:authors, :publishers, :tags]])
+    comics = Repo.preload(comics, [:cover, :localizers, :chapters, title: [:authors, :publishers, :tags]])
 
     render(conn, :index, comics: comics)
   end
@@ -85,22 +87,37 @@ defmodule CeresWeb.Api.Comics.ComicsController do
   end
 
 
+  def create(conn, %{
+    "title_id" => title_id,
+    "name" => name,
+    "description" => description,
+    "language" => language,
+    "localizers_id" => localizers_id_list
+    }) do
 
+    attrs = %{
+      title_id: title_id,
+      name: name,
+      description: description,
+      language: language
+    }
 
+    case Titles.create_comic(attrs) do
+      {:ok, comic} ->
+        localizers_id_list
+        |> Enum.map(fn localizer_id ->
+          Localizers.create_localizers_comics(%{localizer_id: localizer_id, comic_id: comic.id})
+        end)
 
+        comic = Repo.preload(comic, [:cover, :localizers, :chapters, title: [:authors, :publishers, :tags]])
+        render(conn, :show, comic: comic)
 
+      {:error, %Ecto.Changeset{} = changeset} ->
+        Logger.error("Error while creating comic entity.\n#{inspect(changeset)}")
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "Error while creating comic entity. Check server logs, please."})
+    end
 
-
-  # def upload(conn,%{
-  #   "file" => %Plug.Upload{} = upload,
-  #   "chapter" => chapter
-  # }) do
-
-  #   IO.inspect(chapter, label: "chapter")
-  #   IO.inspect(upload, label: "upload")
-
-  #   File.cp!(upload.path, "/tmp/#{upload.filename}")
-
-  #   json(conn, %{status: "ok"})
-  # end
+  end
 end

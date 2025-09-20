@@ -19,7 +19,7 @@ defmodule CeresWeb.Chapters.ChaptersNew do
     |> assign(:comic, comic)
     |> assign(:chapter, %Chapter{comic_id: comic.id})
     |> assign(:form, Titles.change_chapter(%Chapter{}) |> to_form)
-    |> assign(:pages, [])
+    |> assign(:status, nil)
     |> allow_upload(:chapter_zip, accept: ~w(.zip), max_entries: 1, max_file_size: 50_000_000)
 
     {:ok, socket}
@@ -47,7 +47,7 @@ defmodule CeresWeb.Chapters.ChaptersNew do
     with {:ok, %Chapter{} = chapter} <- Titles.create_chapter(chapter) |> IO.inspect(label: "chapter"),
         {:ok, tmpdir} <- parse_zip_chapter(socket, chapter)
       do
-        convert_images(tmpdir, chapter.id)  # TODO
+        # convert_images(tmpdir, chapter.id)  # TODO
 
         {:noreply, socket |> assign(:created_chapter_id, chapter.id)}
       else
@@ -59,19 +59,25 @@ defmodule CeresWeb.Chapters.ChaptersNew do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("validate-upload", _params, socket) do
-    {:noreply, socket}
-  end
+  def handle_event("validate-upload", _params, socket), do: {:noreply, socket}
 
   defp parse_zip_chapter(socket, %Chapter{} = chapter) do
     path = consume_uploaded_entries(socket, :chapter_zip, fn %{path: path}, _entry ->
-      tmpdir = upload_tmpdir()
-
-      dest = String.to_charlist(tmpdir)
+      tmpdir = Converter.generate_tmpdir()
 
       with {:ok, binary} <- File.read(path),
-           {:ok, _files} <- :zip.unzip(binary, [{:cwd, dest}])
+           {:ok, _files} <- :zip.unzip(binary, [{:cwd, String.to_charlist(tmpdir)}])
       do
+        mypid = self()
+
+        Task.start(fn ->
+          res = save_pages(tmpdir, chapter.id)
+          if Enum.any?(res, &match?({:error, _}, &1)) do
+            send(mypid, {:status, {:error, "Error while saving pages, please check server logs."}})
+          else
+            send(mypid, {:status, :ok})
+          end
+        end)
 
         {:ok, tmpdir}
       else
@@ -87,134 +93,44 @@ defmodule CeresWeb.Chapters.ChaptersNew do
     end
   end
 
-  defp convert_images(basedir, chapter_id) do
-    pid = self()
-    Task.start(fn ->
-      converted_files = Converter.get_files(basedir)
-      |> sendfiles(pid)
-      |> Converter.convert_files_to_avif(pid)
+  defp save_pages(tmpdir, chapter_id) do
+    Converter.files(tmpdir)
+    |> Enum.map(fn {index, filepath} ->
+      page_params = %{chapter_id: chapter_id, number: index, source: "#{@bucket}:#{chapter_id}/#{index}.jpeg"}
 
-      if Enum.any?(converted_files, fn {status, _ref, _index, _path} -> status == :error end) do
-        send(pid, {:error, "Error while converting images. Directory will be removed."})
-        Logger.error("Error while converting images. Directory #{basedir} will be removed.")
-        File.rm_rf!(basedir)
-      end
-
-      converted_files
-      |> save_pages(chapter_id, pid)
-
-      File.rm_rf!(basedir)
-    end)
-  end
-
-  @doc """
-  Just send file list in view process
-  """
-  @spec sendfiles([{reference(), String.t(), integer(), integer()}], pid()) :: any()
-  defp sendfiles(files, pid) do
-    send(pid, {:started, files})
-    files
-  end
-
-
-  defp save_pages(converted_files, chapter_id, view_pid) do
-    for {status, ref, index, path} <- converted_files do
-      if status != :ok, do: raise "Error, status is #{status}"
-
-      s3_dest = "#{chapter_id}/#{index}.avif"
-
-      case Titles.create_page(%{chapter_id: chapter_id, number: index, source: "#{@bucket}:#{s3_dest}"}) do
+      case Titles.create_page(page_params) do
         {:ok, %Page{} = page} ->
-          S3.upload_to_s3(@bucket, path, s3_dest)
-          send(view_pid, {:saved, ref})
+          case S3.upload_to_s3(@bucket, filepath, "#{chapter_id}/#{index}.jpeg") do
+            {:ok, _path} ->
+              :ok
 
-        other -> raise "Error while creating page. #{inspect(other)}"
+            {:error, error} ->
+              Logger.error("Error while uploading #{filepath} to s3. Error: #{inspect(error)}")
+              {:error, error}
+          end
+
+        {:error, changeset} ->
+          Logger.error("Error while creating page.\n#{inspect(changeset)}")
+          {:error, changeset}
       end
-    end
-  end
-
-  @doc """
-  Generate path to basedir for uploaded images
-  """
-  defp upload_tmpdir, do: "#{System.tmp_dir!}/#{generate_id()}"
-
-
-  defp generate_id(length \\ 24) do
-    :crypto.strong_rand_bytes(length)
-    |> Base.url_encode64()
-    |> String.replace(~r/[-_]/, "")
-    |> String.slice(0, length)
-  end
-
-  @impl Phoenix.LiveView
-  def handle_info({:started, files}, socket) do
-    pages = Enum.map(files, fn {ref, path, size, index} ->
-      %{id: :erlang.ref_to_list(ref), path: path, size: format_bytes(size), new_size: nil, is_converted: false, s3: false}
     end)
+  end
 
-    socket = socket
-    |> assign(:pages, pages)
-
-
+  def handle_info({:status, msg}, socket) do
+    socket = case msg do
+      :ok ->
+        socket |> assign(:status, :ok)
+      {:error, msg} ->
+        socket  |> assign(:status, :error) |> put_flash(:error, msg)
+    end
     {:noreply, socket}
   end
 
-  @impl Phoenix.LiveView
-  def handle_info({:error, error}, socket) do
-    Titles.get_chapter!(socket.assigns.created_chapter_id)
-    |> Titles.delete_chapter()
-
-    {:noreply, socket |> put_flash(:error, "Error while creating chapter. \n#{inspect(error)}")}
-  end
-
-  @doc """
-  Handle info from convert_to_avif
-  """
-  @impl Phoenix.LiveView
-  def handle_info({:converted, {ref, size}}, socket) do
-    pages = socket.assigns.pages
-    page = Enum.find(pages, fn p -> p.id == :erlang.ref_to_list(ref) end)
-
-    socket = socket
-    |> assign(:pages, List.replace_at(pages, pages |> Enum.find_index(fn p -> p.id == :erlang.ref_to_list(ref) end), %{page | new_size: format_bytes(size), is_converted: true}))
-
-    {:noreply, socket}
-  end
-
-  @impl Phoenix.LiveView
-  def handle_info({:saved, ref}, socket) do
-    pages = socket.assigns.pages
-
-    page = Enum.find(pages, fn p -> p.id == :erlang.ref_to_list(ref) end)
-
-    socket = socket
-    |> assign(:pages, List.replace_at(pages, pages |> Enum.find_index(fn p -> p.id == :erlang.ref_to_list(ref) end), %{page | s3: true}))
-
-    {:noreply, socket}
-  end
-
-  @impl Phoenix.LiveView
-  def handle_info({:finished}, socket) do
-    socket = socket
-    |> put_flash(:info, "Chapter created successfully")
-
-    {:noreply, socket}
-  end
-
-
-
-
-  @units ["B", "KB", "MB", "GB", "TB", "PB"]
-
-  def format_bytes(bytes) when is_integer(bytes) and bytes >= 0 do
-    format(bytes, 0)
-  end
-
-  defp format(bytes, unit_index) when bytes < 1024 or unit_index == length(@units) - 1 do
-    "#{round(bytes)} #{@units |> Enum.at(unit_index)}"
-  end
-
-  defp format(bytes, unit_index) do
-    format(bytes / 1024, unit_index + 1)
+  @spec parse_status(:ok | :error) :: String.t()
+  def parse_status(status) do
+    case status do
+      :ok -> "Succesfully uploaded"
+      :error -> "Error while uploading"
+    end
   end
 end

@@ -14,6 +14,7 @@ defmodule Ceres.Storage.S3 do
       {:ok, "bucket:s3/path/to/file"} | {:error, error}
   """
   @spec upload_to_s3(String.t(), String.t(), String.t()) :: {:ok, String.t()} | {:error, String.t()}
+
   def upload_to_s3(bucket, filepath, s3_dest) do
     case S3.put_object(bucket, s3_dest, File.read!(filepath)) |> ExAws.request do
       {:ok, _} ->
@@ -25,6 +26,7 @@ defmodule Ceres.Storage.S3 do
     end
   end
 
+
   @doc """
   Remove image from s3
 
@@ -34,6 +36,7 @@ defmodule Ceres.Storage.S3 do
       :ok | :error
   """
   @spec remove_from_s3(String.t(), String.t()) :: :ok | :error
+
   def remove_from_s3(bucket, s3_path) do
     case S3.delete_object(bucket, s3_path) |> ExAws.request do
       {:ok, _} ->

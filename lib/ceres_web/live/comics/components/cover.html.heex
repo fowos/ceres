@@ -5,7 +5,7 @@
     <div class="h-full">
       <%= if @comic.cover do %>
         <div class="mx-auto">
-          <img class="rounded-md shadow-xl w-64 h-64 object-cover object-center" src={parse_image_source(@comic.cover.source)}/>
+          <img class="rounded-md shadow-xl w-64 h-64 object-cover object-center" src={parse_image_source(@cover)}/>
         </div>
       <% else %>
         <div>

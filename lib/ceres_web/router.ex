@@ -41,8 +41,6 @@ defmodule CeresWeb.Router do
     get "/pages/:id", Api.Pages.PagesController, :index
 
     get "/tags", Api.Tags.TagsController, :index
-
-    post "/chapters/upload", Api.Comics.ComicsController, :upload
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
@@ -98,6 +96,10 @@ defmodule CeresWeb.Router do
 
     get "/titles/:name", Api.Titles.TitlesController, :show
     put "/titles", Api.Titles.TitlesController, :create
+
+    put "/chapters/upload", Api.Chapters.ChaptersController, :upload
+
+    put "/comics", Api.Comics.ComicsController, :create
   end
 
   scope "/", CeresWeb do

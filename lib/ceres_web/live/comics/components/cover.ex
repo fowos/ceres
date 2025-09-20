@@ -17,9 +17,12 @@ defmodule CeresWeb.Comics.Components.Cover do
   @impl Phoenix.LiveComponent
   def update(assigns, socket) do
 
+    cover? = assigns.comic |> Repo.preload(:cover) |> Map.get(:cover)
+
     socket = socket
     |> allow_upload(:cover, accept: ~w(.jpg .jpeg .png), max_entries: 1, max_file_size: 20_000_000)
-    |> assign(:comic, assigns.comic |> Repo.preload(:cover))
+    |> assign(:comic, assigns.comic)
+    |> assign(:cover, cover?)
 
     {:ok, socket}
   end
@@ -35,88 +38,51 @@ defmodule CeresWeb.Comics.Components.Cover do
   def handle_event("submit-cover", params, socket) do
     IO.inspect(params, label: "params")
 
-    consume_uploaded_entries(socket, :cover, fn %{path: path}, entry ->
-      dest = upload_tmpdir()
+    filepath = consume_uploaded_entries(socket, :cover, fn %{path: path}, entry ->
+      dest = Converter.generate_tmpdir()
       File.mkdir_p!(dest)
 
-      IO.inspect(dest, label: "dest") # TODO
-
-      destpath = Path.join(dest, entry.client_name)
-
-      File.cp!(path, destpath)
-
-      save_cover(destpath, socket.assigns.comic.id)
-      {:ok, destpath}
+      filepath = Path.join(dest, entry.client_name)
+      File.cp!(path, filepath)
+      {:ok, filepath}
     end)
 
 
-    {:noreply, socket}
+    case save_cover(filepath, socket.assigns.comic.id) do
+      :ok ->
+        socket = socket
+        |> put_flash(:info, "Cover uploaded successfully")
+        |> assign(:cover, Titles.get_cover_by_comic_id(socket.assigns.comic.id))
+
+        {:noreply, socket}
+      {:error, error} ->
+        Logger.error("Error while uploading cover. #{inspect(error)}")
+        socket = socket
+        |> put_flash(:error, "Error while uploading cover. #{inspect(error)}")
+        {:noreply, socket}
+    end
   end
 
   defp save_cover(filepath, comic_id) do
-    Task.start(fn ->
-      basedir = Path.dirname(filepath)
-
-      converted = Converter.get_files(basedir)
-      |> Converter.convert_files_to_avif(nil)
-
-      if Enum.any?(converted, fn {status, _ref, _index, _path} -> status == :error end) do
-        Logger.error("Error while converting images. Directory #{basedir} will be removed.")
-        File.rm_rf!(basedir)
-      end
-
-      converted
-      |> List.first()
-      |> save_cover_to_s3("comics", comic_id)
-
-      case converted do
-        {:error, error} ->
-          Logger.error("Error while saving cover. Error: #{inspect(error)}")
-        _ ->
-          :ok
-      end
-    end)
-  end
-
-  defp save_cover_to_s3({:ok, ref, index, file}, bucket, comic_id) do
-    s3_dest = "#{comic_id}/cover.avif"
-
     case Titles.get_cover_by_comic_id(comic_id) do
-      nil ->
-        :ok
-      cover ->
-        S3.remove_from_s3(bucket, cover.source)
-        Titles.delete_cover(cover)
+      %Titles.Cover{} = cover -> Titles.delete_cover(cover)
+      _ -> nil
     end
 
-    case Titles.create_cover(%{source: "#{bucket}:#{s3_dest}", comic_id: comic_id}) do
+    case Titles.create_cover(%{source: "comics:#{comic_id}/cover.jpeg", comic_id: comic_id}) do
       {:ok, cover} ->
-        case S3.upload_to_s3(bucket, file, s3_dest) do
-          {:ok, source} ->
-            {:ok, source}
-          {:error, error} ->
-            Logger.error("Error while uploading #{file} to s3. Error: #{inspect(error)}")
-            {:error, error}
+        case S3.upload_to_s3("comics", filepath, "#{comic_id}/cover.jpeg") do
+          {:ok, _path} -> :ok
+          {:error, error} -> {:error, error}
         end
-      {:error, %Ecto.Changeset{} = changeset} ->
-        Logger.error("Error while saving cover #{inspect(changeset)}")
-        {:error, changeset}
+      {:error, changeset} -> {:error, changeset}
     end
-
-    File.rm_rf!(Path.dirname(file))
   end
 
   @doc """
-    Generate path to basedir for uploaded images
+  Parse cover source
+
+  DateTime.utc_now() used for force refresh image in browser
   """
-  defp upload_tmpdir, do: "#{System.tmp_dir!}/#{generate_id()}"
-  defp generate_id(length \\ 24) do
-    :crypto.strong_rand_bytes(length)
-    |> Base.url_encode64()
-    |> String.replace(~r/[-_]/, "")
-    |> String.slice(0, length)
-  end
-
-  def parse_image_source(source), do: "/api/image/" <> source
-
+  def parse_image_source(cover), do: "/api/image/" <> cover.source <> "?date=#{DateTime.utc_now()}"
 end

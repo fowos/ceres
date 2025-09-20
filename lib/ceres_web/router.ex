@@ -13,6 +13,7 @@ defmodule CeresWeb.Router do
     plug :fetch_current_scope_for_user
   end
 
+
   pipeline :api do
     plug :accepts, ["json"]
 
@@ -30,6 +31,8 @@ defmodule CeresWeb.Router do
 
     get "/image/*key", Api.Images.ImageController, :download
 
+    get "/titles/:name", Api.Titles.TitlesController, :show
+
     get "/comics/:name", Api.Comics.ComicsController, :index
     get "/comics", Api.Comics.ComicsController, :index
     post "/comics", Api.Comics.ComicsController, :by_params
@@ -38,6 +41,8 @@ defmodule CeresWeb.Router do
     get "/pages/:id", Api.Pages.PagesController, :index
 
     get "/tags", Api.Tags.TagsController, :index
+
+    post "/chapters/upload", Api.Comics.ComicsController, :upload
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
@@ -85,6 +90,14 @@ defmodule CeresWeb.Router do
     end
 
     post "/users/update-password", UserSessionController, :update_password
+  end
+
+  scope "/api", CeresWeb do
+    pipe_through :api
+    # TODO: auth for api, Phoenix.Token
+
+    get "/titles/:name", Api.Titles.TitlesController, :show
+    put "/titles", Api.Titles.TitlesController, :create
   end
 
   scope "/", CeresWeb do

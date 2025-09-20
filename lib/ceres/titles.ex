@@ -40,6 +40,11 @@ defmodule Ceres.Titles do
     Repo.get_by!(Title, id: id)
   end
 
+
+  def get_title_by_name(name) do
+    Repo.get_by(Title, original_name: name)
+  end
+
   @doc """
   Creates a title.
 

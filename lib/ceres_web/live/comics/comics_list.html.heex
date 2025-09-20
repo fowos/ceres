@@ -24,7 +24,9 @@
           <%= if comic.cover do %>
             <image class="rounded-lg shadow-xl w-20 h-20 object-cover object-center" src={~p"/api/image/#{comic.cover.source}"}/>
           <% else %>
-            <div class="skeleton w-20 h-20 shadow-xl rounded-lg"></div>
+            <div class="skeleton w-20 h-20 shadow-xl rounded-lg flex items-center justify-center font-semibold">
+              No cover
+            </div>
           <% end %>
         </:col>
         <:col :let={{_id, comic}} label="Name">{comic.name}</:col>

@@ -83,4 +83,24 @@ defmodule CeresWeb.Api.Comics.ComicsController do
         sum(fragment("CASE WHEN ? = ANY(?) THEN 1 ELSE 0 END", a.name, ^authors)) == ^length(authors)
       )
   end
+
+
+
+
+
+
+
+
+  # def upload(conn,%{
+  #   "file" => %Plug.Upload{} = upload,
+  #   "chapter" => chapter
+  # }) do
+
+  #   IO.inspect(chapter, label: "chapter")
+  #   IO.inspect(upload, label: "upload")
+
+  #   File.cp!(upload.path, "/tmp/#{upload.filename}")
+
+  #   json(conn, %{status: "ok"})
+  # end
 end

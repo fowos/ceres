@@ -8,24 +8,53 @@ defmodule CeresWeb.Comics.ComicsList do
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
-    comics = Titles.list_comics(offset: 0, limit: 10) |> Repo.preload([:localizers, :chapters, :cover])
+    comics = Titles.list_comics(offset: 0, limit: 10, order_by: [desc: :inserted_at]) |> Repo.preload([:localizers, :chapters, :cover])
 
     socket = socket
     |> stream(:comics, comics)
     |> assign(:limit, 10)
     |> assign(:offset, 0)
+    # |> assign(:order_by, [desc: :inserted_at])
 
     {:ok, socket}
   end
+
+  # def handle_params(params, _uri, socket) do
+  #   sort_by = params |> Map.get("sort_by", "inserted_at") |> String.to_existing_atom()
+  #   order_by = params |> Map.get("order_by", "desc") |> String.to_existing_atom()
+
+  #   limit = socket.assigns.limit
+  #   offset = socket.assigns.offset
+
+  #   order = [{order_by, sort_by}]
+
+  #   IO.inspect(order, label: "order")
+
+  #   comics =
+  #     Titles.list_comics(limit: limit, offset: offset, order_by: order)
+  #     |> Repo.preload([:localizers, :chapters, :cover])
+
+  #   socket
+  #   |> stream(:comics, comics)
+  #   |> assign(:order_by, order)
+
+  #   {:noreply, socket}
+  # end
+
 
   @impl Phoenix.LiveView
   def handle_event("delete-comic", %{"id" => id}, socket) do
     comic = Titles.get_comic!(id)
     case Titles.delete_comic(comic) do
       {:ok, _} ->
-        {:noreply, stream_delete(socket, :comics, comic)}
+        socket = socket
+        |> stream_delete(:comics, comic)
+        |> put_flash(:info, "Comic deleted successfully")
+        {:noreply, socket}
       {:error, changeset} ->
-        Logger.error("Error while deleting comic. \n#{inspect(changeset)}")
+        Logger.error("Error while deleting comic.\n#{inspect(changeset)}")
+        socket = socket
+        |> put_flash(:error, "Error while deleting comic. Please check server logs")
         {:noreply, socket}
     end
   end
@@ -39,8 +68,6 @@ defmodule CeresWeb.Comics.ComicsList do
     |> assign(:offset, offset)
     {:noreply, socket}
   end
-
-
 
   defp localizers_names(localizers) do
     Enum.map(localizers, fn l -> l.name end)
@@ -59,4 +86,5 @@ defmodule CeresWeb.Comics.ComicsList do
         Atom.to_string(lang)
     end
   end
+
 end

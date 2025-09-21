@@ -3,7 +3,7 @@
 
   <.form id="cover-form" phx-submit="submit-cover" phx-target={@myself}>
     <div class="h-full">
-      <%= if @comic.cover do %>
+      <%= if @cover != nil do %>
         <div class="mx-auto">
           <img class="rounded-md shadow-xl w-64 h-64 object-cover object-center" src={parse_image_source(@cover)}/>
         </div>

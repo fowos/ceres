@@ -128,25 +128,23 @@ defmodule Ceres.Titles do
       iex> list_comics()
       [%Comic{}, ...]
 
-      iex> list_comics(limit: 10)
-      [%Comic{}, ...]
-
-      iex> list_comics(offset: 10)
-      [%Comic{}, ...]
-
       iex> list_comics(limit: 10, offset: 10)
+      [%Comic{}, ...]
+
+      iex> list_comics(order_by: [asc: :id])
       [%Comic{}, ...]
 
   """
   def list_comics(opts \\ []) do
     offset = Keyword.get(opts, :offset, 0)
     limit = Keyword.get(opts, :limit, 50)
+    order_by = Keyword.get(opts, :order_by, [desc: :inserted_at])
 
     query =
       from c in Comic,
       limit: ^limit,
       offset: ^offset,
-      order_by: [desc: c.inserted_at]
+      order_by: ^order_by
 
     Repo.all(query)
   end

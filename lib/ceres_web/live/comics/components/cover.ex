@@ -84,5 +84,9 @@ defmodule CeresWeb.Comics.Components.Cover do
 
   DateTime.utc_now() used for force refresh image in browser
   """
-  def parse_image_source(cover), do: "/api/image/" <> cover.source <> "?date=#{DateTime.utc_now()}"
+  def parse_image_source(cover) do
+    IO.inspect(cover, label: "cover")
+
+    "/api/image/" <> cover.source <> "?date=#{DateTime.utc_now()}"
+  end
 end

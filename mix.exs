@@ -73,7 +73,8 @@ defmodule Ceres.MixProject do
       {:poison, "~> 3.0"},
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.7"},
-      {:flow, "~> 1.0"}
+      {:logger_file_backend, "~> 0.0.14"},
+      {:recon, "~> 2.5"}
     ]
   end
 

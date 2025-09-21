@@ -46,7 +46,7 @@ defmodule CeresWeb.Endpoint do
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
     json_decoder: Phoenix.json_library(),
-    length: 100_000_000
+    length: 500_000_000
 
   plug Plug.MethodOverride
   plug Plug.Head

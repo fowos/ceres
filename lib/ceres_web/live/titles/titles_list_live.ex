@@ -11,15 +11,13 @@ alias Ceres.Repo
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket = socket
-    |> stream(:titles, Titles.list_titles() |> Repo.preload([:comics, :tags]))
+    |> assign(:page_title, "Titles")
+    |> stream(:titles, Titles.list_titles(limit: 20, offset: 0) |> Repo.preload([:comics, :tags]))
     |> assign(:title_changeset, Titles.Title.changeset(%Title{}, %{}))
+    |> assign(:limit, 20)
+    |> assign(:offset, 0)
+
     {:ok, socket}
-  end
-
-
-  @impl Phoenix.LiveView
-  def handle_event("open_modal", _params, socket) do
-    {:noreply, assign(socket, :modal, :new_title)}
   end
 
   @impl Phoenix.LiveView
@@ -39,7 +37,6 @@ alias Ceres.Repo
         {:noreply,
          socket
          |> assign(:titles, Titles.list_titles())
-         |> assign(:modal, nil)
          |> put_flash(:info, "Title created successfully")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -62,11 +59,14 @@ alias Ceres.Repo
     end
   end
 
-
-
   @impl Phoenix.LiveView
-  def handle_info({:modal_closed, _id}, socket) do
-    {:noreply, assign(socket, :modal, nil)}
-  end
+  def handle_event("load-more", _params, socket) do
+    offset = socket.assigns.offset + socket.assigns.limit
+    titles = Titles.list_titles(offset: offset, limit: socket.assigns.limit) |> Repo.preload([:comics, :tags])
+    socket = socket
+    |> stream(:titles, titles)
+    |> assign(:offset, offset)
 
+    {:noreply, socket}
+  end
 end

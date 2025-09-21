@@ -11,4 +11,19 @@ Hooks.CopyToClipboard = {
   }
 }
 
+Hooks.InfiniteScroll = {
+  mounted() {
+    let observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          this.pushEvent("load-more")
+        }
+      })
+    })
+
+    observer.observe(this.el)
+  }
+}
+
+
 export default Hooks

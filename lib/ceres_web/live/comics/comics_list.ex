@@ -6,17 +6,19 @@ defmodule CeresWeb.Comics.ComicsList do
 
   require Logger
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
-    comics = Titles.list_comics |> Repo.preload([:localizers, :chapters, :cover])
+    comics = Titles.list_comics(offset: 0, limit: 10) |> Repo.preload([:localizers, :chapters, :cover])
 
     socket = socket
     |> stream(:comics, comics)
+    |> assign(:limit, 10)
+    |> assign(:offset, 0)
 
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("delete-comic", %{"id" => id}, socket) do
     comic = Titles.get_comic!(id)
     case Titles.delete_comic(comic) do
@@ -28,6 +30,15 @@ defmodule CeresWeb.Comics.ComicsList do
     end
   end
 
+  @impl Phoenix.LiveView
+  def handle_event("load-more", _params, socket) do
+    offset = socket.assigns.offset + socket.assigns.limit
+    comics = Titles.list_comics(offset: offset, limit: socket.assigns.limit) |> Repo.preload([:localizers, :chapters, :cover])
+    socket = socket
+    |> stream(:comics, comics)
+    |> assign(:offset, offset)
+    {:noreply, socket}
+  end
 
 
 

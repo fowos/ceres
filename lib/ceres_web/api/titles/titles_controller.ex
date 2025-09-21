@@ -84,7 +84,7 @@ defmodule CeresWeb.Api.Titles.TitlesController do
               |> json(%{error: "Server error, please try again later. For additional information check server logs."})
           end
         {:error, %Ecto.Changeset{} = error} ->
-          Logger.error("Error while creating title,#{inspect(error)}")
+          Logger.error("Error while creating title, error: #{inspect(error)}")
           conn
           |> put_status(:bad_request)
           |> json(%{error: "Error while creating title. Check server logs, please."})

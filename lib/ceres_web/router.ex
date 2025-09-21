@@ -100,6 +100,8 @@ defmodule CeresWeb.Router do
     put "/chapters/upload", Api.Chapters.ChaptersController, :upload
 
     put "/comics", Api.Comics.ComicsController, :create
+
+    put "/tags", Api.Tags.TagsController, :create
   end
 
   scope "/", CeresWeb do

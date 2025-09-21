@@ -16,9 +16,23 @@ defmodule Ceres.Tags do
       iex> list_tags()
       [%Tag{}, ...]
 
+      iex> list_tags(limit: 10)
+      [%Tag{}, ...]
+
+      iex> list_tags(offset: 10)
+      [%Tag{}, ...]
+
+      iex> list_tags(limit: 10, offset: 10)
+      [%Tag{}, ...]
+
   """
-  def list_tags do
-    Repo.all(Tag)
+  def list_tags(opts \\ []) do
+    limit = Keyword.get(opts, :limit, 1000)
+    offset = Keyword.get(opts, :offset, 0)
+
+    query = from t in Tag, limit: ^limit, offset: ^offset
+
+    Repo.all(query)
   end
 
 
@@ -226,6 +240,15 @@ defmodule Ceres.Tags do
     Repo.all(query)
   end
 
+  @doc """
+  Get tag by name
+
+  ## Examples
+
+      iex> get_tag_by_name("name")
+      %Tag{}
+  """
+  @spec get_tag_by_name(String.t()) :: Tag.t() | term() | nil
   def get_tag_by_name(name) do
     query = from t in Tag, where: t.name == ^name
     Repo.one(query)

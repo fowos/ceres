@@ -14,66 +14,68 @@
   </.header>
 
 
-  <.table
-    id="titles"
-    rows={@streams.titles}
-  >
-    <:col :let={{_id, title}} label="ID">
-      <button
-        class="p-1.5 me-2 rounded-lg bg-base-300 shadow-lg cursor-pointer duration-300 hover:bg-base-100"
-        phx-hook="CopyToClipboard"
-        data-text={title.id}
-        id={title.id}
-      >
-        <.icon name="hero-clipboard-document-list" class="size-5"/>
-      </button>
+  <div class="overflow-x-auto">
+    <.table
+      id="titles"
+      rows={@streams.titles}
+    >
+      <:col :let={{_id, title}} label="ID">
+        <button
+          class="p-1.5 me-2 rounded-lg bg-base-300 shadow-lg cursor-pointer duration-300 hover:bg-base-100"
+          phx-hook="CopyToClipboard"
+          data-text={title.id}
+          id={title.id}
+        >
+          <.icon name="hero-clipboard-document-list" class="size-5"/>
+        </button>
 
-    </:col>
+      </:col>
 
-    <:col :let={{_id, title}} label="Original name">{title.original_name}</:col>
+      <:col :let={{_id, title}} label="Original name">{title.original_name}</:col>
 
-    <:col :let={{_id, title}} label="Type">{title.type}</:col>
+      <:col :let={{_id, title}} label="Type">{title.type}</:col>
 
-    <:col :let={{_id, title}} label="Tags">
-      <div class="tooltip cursor-pointer">
-        <%= if Enum.count(title.tags) > 0 do %>
-          <div class="tooltip-content bg-base-300 py-2 flex flex-wrap gap-2 max-w-sm rounded-lg">
-            <%= for tag <- title.tags do %>
-              <p class="flex-1 py-1 px-2 bg-base-100 rounded-lg">{tag.name}</p>
+      <:col :let={{_id, title}} label="Tags">
+        <%= if title.tags != [] do %>
+          <div class="tooltip cursor-pointer">
+            <%= if Enum.count(title.tags) > 0 do %>
+              <div class="tooltip-content bg-base-300 py-2 flex flex-wrap gap-2 max-w-sm rounded-lg">
+                <%= for tag <- title.tags do %>
+                  <p class="flex-1 py-1 px-2 bg-base-100 rounded-lg">{tag.name}</p>
+                <% end %>
+              </div>
             <% end %>
+
+            <span class="py-1 px-2 bg-base-300 rounded-lg">
+              {Enum.count(title.tags)}
+            </span>
           </div>
         <% end %>
+      </:col>
 
-        <span>
-          Tags
-          <span class="py-1 px-2 bg-base-300 rounded-lg">
-            {Enum.count(title.tags)}
-          </span>
-        </span>
-      </div>
-    </:col>
+      <:col :let={{_id, title}} label="Comics">{Enum.count(title.comics)}</:col>
 
-    <:col :let={{_id, title}} label="Comics">{Enum.count(title.comics)}</:col>
+      <:action :let={{_id, title}}>
+        <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/comics/new/#{title}"}>
+          <.icon name="hero-plus" class="size-5"/>
+        </.button>
 
-    <:action :let={{_id, title}}>
-      <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/comics/new/#{title}"}>
-        <.icon name="hero-plus" class="size-5"/>
-      </.button>
+        <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/titles/#{title}/edit"}>
+          <.icon name="hero-pencil-square" class="size-5"/>
+        </.button>
 
-      <.button class="btn btn-primary btn-soft rounded-lg" navigate={~p"/titles/#{title}/edit"}>
-        <.icon name="hero-pencil-square" class="size-5"/>
-      </.button>
-
-      <.button
-        class="btn btn-error btn-soft rounded-lg"
-        phx-click="delete-title"
-        phx-value-id={title.id}
-        data-confirm="Are you sure want to delete title?"
-      >
-        <.icon name="hero-trash" class="size-5"/>
-      </.button>
-    </:action>
-  </.table>
+        <.button
+          class="btn btn-error btn-soft rounded-lg"
+          phx-click="delete-title"
+          phx-value-id={title.id}
+          data-confirm="Are you sure want to delete title?"
+        >
+          <.icon name="hero-trash" class="size-5"/>
+        </.button>
+      </:action>
+    </.table>
+    <div id="infinite-scroll" phx-hook="InfiniteScroll"></div>
+  </div>
 
 
 

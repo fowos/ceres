@@ -17,9 +17,17 @@ defmodule Ceres.Titles do
       iex> list_titles()
       [%Title{}, ...]
 
+      iex> list_titles(limit: 10, offset: 10)
+      [%Title{}, ...]
+
   """
-  def list_titles() do
-    Repo.all(Title)
+  def list_titles(opts \\ []) do
+    limit = Keyword.get(opts, :limit, 50)
+    offset = Keyword.get(opts, :offset, 0)
+
+    query = from t in Title, limit: ^limit, offset: ^offset
+
+    Repo.all(query)
   end
 
   @doc """
@@ -120,9 +128,27 @@ defmodule Ceres.Titles do
       iex> list_comics()
       [%Comic{}, ...]
 
+      iex> list_comics(limit: 10)
+      [%Comic{}, ...]
+
+      iex> list_comics(offset: 10)
+      [%Comic{}, ...]
+
+      iex> list_comics(limit: 10, offset: 10)
+      [%Comic{}, ...]
+
   """
-  def list_comics do
-    Repo.all(Comic)
+  def list_comics(opts \\ []) do
+    offset = Keyword.get(opts, :offset, 0)
+    limit = Keyword.get(opts, :limit, 50)
+
+    query =
+      from c in Comic,
+      limit: ^limit,
+      offset: ^offset,
+      order_by: [desc: c.inserted_at]
+
+    Repo.all(query)
   end
 
   @doc """

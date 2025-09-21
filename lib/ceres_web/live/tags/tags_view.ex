@@ -1,6 +1,5 @@
 defmodule CeresWeb.Tags.TagsView do
-alias Ceres.Repo
-alias Ceres.Tags
+  alias Ceres.Tags
   use CeresWeb, :live_view
 
   require Logger
@@ -8,7 +7,7 @@ alias Ceres.Tags
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
-    tags = Tags.list_tags_order_by_title_count() |> IO.inspect(label: "tags")
+    tags = Tags.list_tags_order_by_title_count()
 
     socket = socket
     |> stream(:tags, tags)

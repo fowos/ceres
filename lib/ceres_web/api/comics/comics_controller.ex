@@ -13,6 +13,8 @@ defmodule CeresWeb.Api.Comics.ComicsController do
 
   action_fallback CeresWeb.Api.FallbackController
 
+  @page_size 50
+
   @doc """
   Finc comics by part name
   """
@@ -34,9 +36,27 @@ defmodule CeresWeb.Api.Comics.ComicsController do
   end
 
 
+  @doc """
+  List all comics
+
+  Accepts offset and limit
+  """
+  @impl Phoenix.Controller
   def index(conn, params) do
-    comics = Titles.list_comics()
+    offset = Map.get(params, "offset", "0") |> String.to_integer()
+    tmp_limit = Map.get(params, "limit", "#{@page_size}") |> String.to_integer()
+
+    limit = cond do
+      tmp_limit > 1000 -> 1000
+      tmp_limit < 0 -> @page_size
+      true -> tmp_limit
+    end
+
+    IO.inspect(limit, label: "limit")
+
+    comics = Titles.list_comics(limit: limit, offset: offset)
     |> Repo.preload([:localizers, :chapters, :cover, title: [:authors, :publishers, :tags]])
+
     render(conn, :index, comics: comics)
   end
 
@@ -92,7 +112,7 @@ defmodule CeresWeb.Api.Comics.ComicsController do
     "name" => name,
     "description" => description,
     "language" => language,
-    "localizers_id" => localizers_id_list
+    "localizers" => localizers
     }) do
 
     attrs = %{
@@ -104,7 +124,7 @@ defmodule CeresWeb.Api.Comics.ComicsController do
 
     case Titles.create_comic(attrs) do
       {:ok, comic} ->
-        localizers_id_list
+        localizers
         |> Enum.map(fn localizer_id ->
           Localizers.create_localizers_comics(%{localizer_id: localizer_id, comic_id: comic.id})
         end)

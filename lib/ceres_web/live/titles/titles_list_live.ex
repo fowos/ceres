@@ -1,5 +1,7 @@
 defmodule CeresWeb.TitlesList.TitlesListLive do
-alias Ceres.Repo
+  alias Ceres.Tags
+  alias Hex.API.Key
+  alias Ceres.Repo
   use CeresWeb, :live_view
 
   alias Ceres.Titles
@@ -9,16 +11,19 @@ alias Ceres.Repo
 
 
   @impl Phoenix.LiveView
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
+
     socket = socket
     |> assign(:page_title, "Titles")
     |> stream(:titles, Titles.list_titles(limit: 20, offset: 0) |> Repo.preload([:comics, :tags]))
     |> assign(:title_changeset, Titles.Title.changeset(%Title{}, %{}))
     |> assign(:limit, 20)
     |> assign(:offset, 0)
+    |> assign(:filters, [])
 
     {:ok, socket}
   end
+
 
   @impl Phoenix.LiveView
   def handle_event("validate", %{"title" => params}, socket) do
@@ -62,11 +67,32 @@ alias Ceres.Repo
   @impl Phoenix.LiveView
   def handle_event("load-more", _params, socket) do
     offset = socket.assigns.offset + socket.assigns.limit
-    titles = Titles.list_titles(offset: offset, limit: socket.assigns.limit) |> Repo.preload([:comics, :tags])
+    titles = Titles.list_titles(offset: offset, limit: socket.assigns.limit, filter_by: socket.assigns.filters) |> Repo.preload([:comics, :tags])
     socket = socket
     |> stream(:titles, titles)
     |> assign(:offset, offset)
 
     {:noreply, socket}
   end
+
+  @impl Phoenix.LiveView
+  def handle_info({:filtered, tags_ids, type}, socket) do
+
+    filters = []
+    filters = case type do
+      :any -> filters
+      _ -> Keyword.put(filters, :type, type)
+    end
+
+    filters = case tags_ids do
+      [] -> filters
+      _ -> Keyword.put(filters, :tags, tags_ids)
+    end
+
+    socket = socket
+    |> assign(:filters, filters)
+    |> stream(:titles, titles = Titles.list_titles(limit: 20, offset: 0, filter_by: filters) |> Repo.preload([:comics, :tags]), reset: true)
+    {:noreply, socket}
+  end
+
 end

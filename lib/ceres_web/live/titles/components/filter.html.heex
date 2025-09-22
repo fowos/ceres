@@ -1,0 +1,66 @@
+<div>
+  <.form phx-submit="search-with-filter" phx-target={@myself}>
+    <div class="flex flex-col md:flex-row gap-8">
+      <.input
+        type="select"
+        options={@type_options}
+        id="type-input"
+        name="type"
+        label="Type"
+        phx-debounce="200"
+        phx-change="type-change"
+        phx-target={@myself}
+        value={@type}
+      />
+
+      <div class="relative w-full">
+        <.input
+          type="text"
+          id="tag-input"
+          name="search-tag"
+          label="Tags"
+          phx-debounce="200"
+          phx-change="search-tag-change"
+          phx-target={@myself}
+          value=""
+        />
+
+        <div class="absolute left-0 top-full w-full z-50">
+          <%= if @results != [] do %>
+            <div class="absolute left-0 bg-base-300 top-full w-full z-50 rounded-md border border-base-100 shadow-lg">
+              <.table
+                id="results-table"
+                rows={@results}
+                row_id={fn row -> "tag-#{row.id}" end}
+                row_click={fn row -> JS.push("add-tag", value: %{id: row.id}, target: @myself) end}
+              >
+                <:col :let={tag} label="Name">{tag.name}</:col>
+              </.table>
+            </div>
+          <% end %>
+        </div>
+
+        <ul class="flex flex-row rap gap-2 mb-4">
+          <%= for tag <- @tags do %>
+            <li class="inline-block bg-base-100 text-base-content rounded-md px-2 py-1 text-sm">
+              <%= tag.name %>
+              <.button
+                type="button"
+                phx-click="remove-tag"
+                phx-value-id={tag.id}
+                phx-target={@myself}
+                class="text-error hover:text-warning"
+              >
+                <.icon name="hero-x-mark" class="w-5 h-5"/>
+              </.button>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+
+    <footer class="">
+      <.button phx-target={@myself} phx-disable-with="Saving..." variant="primary" type="submit">Search</.button>
+    </footer>
+  </.form>
+</div>

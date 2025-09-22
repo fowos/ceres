@@ -20,12 +20,32 @@ defmodule Ceres.Titles do
       iex> list_titles(limit: 10, offset: 10)
       [%Title{}, ...]
 
+      iex> list_titles(limit: 10, offset: 10, filter_by: [tags: ["tag1", "tag2"], type: :manga])
+      [%Title{}, ...]
+
   """
   def list_titles(opts \\ []) do
     limit = Keyword.get(opts, :limit, 50)
     offset = Keyword.get(opts, :offset, 0)
 
+    filter_by = Keyword.get(opts, :filter_by, [])
+
+    type = Keyword.get(filter_by, :type, nil)
+    tags = Keyword.get(filter_by, :tags, nil)
+
     query = from t in Title, limit: ^limit, offset: ^offset
+
+    query = if type != nil do
+      from t in query, where: t.type == ^type
+    else
+      query
+    end
+
+    query = if tags != nil do
+      from t in query, join: tag in assoc(t, :tags), where: tag.id in ^tags
+    else
+      query
+    end
 
     Repo.all(query)
   end

@@ -80,12 +80,14 @@ config :logger,
   ]
 
 config :logger, :console,
+  level: :debug,
   format: "[$level] $message\n"
 
 config :logger, :dev_log,
   path: "/tmp/ceres.log",
   level: :info,
-  format: "[$date $time] [$level] $message\n"
+  format: "$time $metadata[$level] $message\n",
+  metadata: [:request_id]
 
 
 # Set a higher stacktrace during development. Avoid configuring such

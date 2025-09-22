@@ -4,8 +4,8 @@ defmodule Ceres.MixProject do
   def project do
     [
       app: :ceres,
-      version: "0.1.0",
-      elixir: "~> 1.15",
+      version: "0.1.1",
+      elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -21,7 +21,7 @@ defmodule Ceres.MixProject do
   def application do
     [
       mod: {Ceres.Application, []},
-      extra_applications: [:logger, :runtime_tools, :os_mon]
+      extra_applications: [:logger, :runtime_tools, :os_mon, :observer, :wx]
     ]
   end
 

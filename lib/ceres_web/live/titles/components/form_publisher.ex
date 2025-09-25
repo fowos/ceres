@@ -27,7 +27,7 @@ defmodule CeresWeb.TitlesList.Components.FormPublisher do
       {:noreply, socket}
     else
       socket = socket
-      |> assign(:results, Authors.get_publishers_by_name(search))
+      |> assign(:results, Authors.get_publishers_by_part_name(search))
 
       {:noreply, socket}
     end

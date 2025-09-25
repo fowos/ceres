@@ -3,6 +3,7 @@ defmodule Ceres.AuthorsFixtures do
   This module defines test helpers for creating
   entities via the `Ceres.Authors` context.
   """
+alias Ceres.TitlesFixtures
 
   @doc """
   Generate a author.
@@ -41,7 +42,9 @@ defmodule Ceres.AuthorsFixtures do
     {:ok, authors_titles} =
       attrs
       |> Enum.into(%{
-        author_role: 42
+        author_id: author_fixture().id,
+        title_id: TitlesFixtures.title_fixture().id,
+        author_role: attrs[:author_role] || :art
       })
       |> Ceres.Authors.create_authors_titles()
 
@@ -55,7 +58,8 @@ defmodule Ceres.AuthorsFixtures do
     {:ok, publishers_titles} =
       attrs
       |> Enum.into(%{
-
+        publisher_id: attrs[:publisher_id] || publisher_fixture().id,
+        title_id: attrs[:title_id] || TitlesFixtures.title_fixture().id
       })
       |> Ceres.Authors.create_publishers_titles()
 

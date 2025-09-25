@@ -18,5 +18,7 @@ defmodule Ceres.Tags.TitlesTags do
     |> cast(attrs, [:title_id, :tag_id])
     |> validate_required([:title_id, :tag_id])
     |> unique_constraint([:title_id, :tag_id])
+    |> foreign_key_constraint(:title_id, name: :titles_tags_title_id_fkey)
+    |> foreign_key_constraint(:tag_id, name: :titles_tags_tag_id_fkey)
   end
 end

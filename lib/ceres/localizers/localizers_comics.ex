@@ -18,5 +18,7 @@ defmodule Ceres.Localizers.LocalizersComics do
     |> cast(attrs, [:comic_id, :localizer_id])
     |> validate_required([:comic_id, :localizer_id])
     |> unique_constraint(:comic_id, name: :localizers_comics_comic_id_localizer_id_index)
+    |> foreign_key_constraint(:comic_id, name: :localizers_comics_comic_id_fkey)
+    |> foreign_key_constraint(:localizer_id, name: :localizers_comics_localizer_id_fkey)
   end
 end

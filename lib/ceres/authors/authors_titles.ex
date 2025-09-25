@@ -17,5 +17,6 @@ defmodule Ceres.Authors.AuthorsTitles do
     authors_titles
     |> cast(attrs, [:author_role, :author_id, :title_id])
     |> validate_required([:author_role, :author_id, :title_id])
+    |> foreign_key_constraint(:title_id, name: :authors_titles_title_id_fkey)
   end
 end

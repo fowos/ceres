@@ -3,6 +3,8 @@ defmodule Ceres.TagsFixtures do
   This module defines test helpers for creating
   entities via the `Ceres.Tags` context.
   """
+alias Ceres.TagsFixtures
+alias Ceres.TitlesFixtures
 
   @doc """
   Generate a tag.
@@ -25,7 +27,8 @@ defmodule Ceres.TagsFixtures do
     {:ok, titles_tags} =
       attrs
       |> Enum.into(%{
-
+        title_id: attrs[:title_id] || TitlesFixtures.title_fixture().id,
+        tag_id: attrs[:tag_id] || TagsFixtures.tag_fixture().id
       })
       |> Ceres.Tags.create_titles_tags()
 

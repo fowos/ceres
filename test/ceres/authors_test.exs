@@ -1,4 +1,7 @@
 defmodule Ceres.AuthorsTest do
+  alias Ceres.Titles
+  alias Ceres.AuthorsFixtures
+  alias Ceres.TitlesFixtures
   use Ceres.DataCase
 
   alias Ceres.Authors
@@ -119,6 +122,7 @@ defmodule Ceres.AuthorsTest do
     alias Ceres.Authors.AuthorsTitles
 
     import Ceres.AuthorsFixtures
+    import Ceres.TitlesFixtures
 
     @invalid_attrs %{author_role: nil}
 
@@ -133,10 +137,10 @@ defmodule Ceres.AuthorsTest do
     end
 
     test "create_authors_titles/1 with valid data creates a authors_titles" do
-      valid_attrs = %{author_role: 42}
+      valid_attrs = %{author_role: :story}
 
-      assert {:ok, %AuthorsTitles{} = authors_titles} = Authors.create_authors_titles(valid_attrs)
-      assert authors_titles.author_role == 42
+      assert %AuthorsTitles{} = authors_titles= authors_titles_fixture(valid_attrs)
+      assert authors_titles.author_role == :story
     end
 
     test "create_authors_titles/1 with invalid data returns error changeset" do
@@ -145,10 +149,10 @@ defmodule Ceres.AuthorsTest do
 
     test "update_authors_titles/2 with valid data updates the authors_titles" do
       authors_titles = authors_titles_fixture()
-      update_attrs = %{author_role: 43}
+      update_attrs = %{author_role: :story_art}
 
       assert {:ok, %AuthorsTitles{} = authors_titles} = Authors.update_authors_titles(authors_titles, update_attrs)
-      assert authors_titles.author_role == 43
+      assert authors_titles.author_role == :story_art
     end
 
     test "update_authors_titles/2 with invalid data returns error changeset" do
@@ -174,7 +178,7 @@ defmodule Ceres.AuthorsTest do
 
     import Ceres.AuthorsFixtures
 
-    @invalid_attrs %{}
+    @invalid_attrs %{title_id: 12, publisher_id: 13}
 
     test "list_publishers_titles/0 returns all publishers_titles" do
       publishers_titles = publishers_titles_fixture()
@@ -189,7 +193,7 @@ defmodule Ceres.AuthorsTest do
     test "create_publishers_titles/1 with valid data creates a publishers_titles" do
       valid_attrs = %{}
 
-      assert {:ok, %PublishersTitles{} = publishers_titles} = Authors.create_publishers_titles(valid_attrs)
+      assert %PublishersTitles{} = publishers_titles_fixture()
     end
 
     test "create_publishers_titles/1 with invalid data returns error changeset" do
@@ -200,7 +204,7 @@ defmodule Ceres.AuthorsTest do
       publishers_titles = publishers_titles_fixture()
       update_attrs = %{}
 
-      assert {:ok, %PublishersTitles{} = publishers_titles} = Authors.update_publishers_titles(publishers_titles, update_attrs)
+      assert {:ok, %PublishersTitles{}} = Authors.update_publishers_titles(publishers_titles, update_attrs)
     end
 
     test "update_publishers_titles/2 with invalid data returns error changeset" do

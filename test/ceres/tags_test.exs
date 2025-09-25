@@ -1,4 +1,6 @@
 defmodule Ceres.TagsTest do
+alias Ceres.TagsFixtures
+alias Ceres.TitlesFixtures
   use Ceres.DataCase
 
   alias Ceres.Tags
@@ -62,7 +64,9 @@ defmodule Ceres.TagsTest do
 
     import Ceres.TagsFixtures
 
-    @invalid_attrs %{}
+    @invalid_attrs %{tag_id: Ecto.UUID.generate(), title_id: Ecto.UUID.generate()}
+    @invalid_attrs2 %{title_id: Ecto.UUID.generate()}
+    @invalid_attrs3 %{tag_id: Ecto.UUID.generate()}
 
     test "list_titles_tags/0 returns all titles_tags" do
       titles_tags = titles_tags_fixture()
@@ -75,7 +79,9 @@ defmodule Ceres.TagsTest do
     end
 
     test "create_titles_tags/1 with valid data creates a titles_tags" do
-      valid_attrs = %{}
+      title = TitlesFixtures.title_fixture()
+      tag = TagsFixtures.tag_fixture()
+      valid_attrs = %{title_id: title.id, tag_id: tag.id}
 
       assert {:ok, %TitlesTags{} = titles_tags} = Tags.create_titles_tags(valid_attrs)
     end
@@ -94,6 +100,9 @@ defmodule Ceres.TagsTest do
     test "update_titles_tags/2 with invalid data returns error changeset" do
       titles_tags = titles_tags_fixture()
       assert {:error, %Ecto.Changeset{}} = Tags.update_titles_tags(titles_tags, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Tags.update_titles_tags(titles_tags, @invalid_attrs2)
+      assert {:error, %Ecto.Changeset{}} = Tags.update_titles_tags(titles_tags, @invalid_attrs3)
+
       assert titles_tags == Tags.get_titles_tags!(titles_tags.id)
     end
 

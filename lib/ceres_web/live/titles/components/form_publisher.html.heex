@@ -44,6 +44,8 @@
             <.table
               id="results-table"
               rows={@results}
+              row_id={fn row -> "publisher-#{row.id}" end}
+              row_click={fn row -> JS.push("select", value: %{id: row.id}, target: @myself) end}
             >
               <:col :let={publisher} label="Name">{publisher.name}</:col>
             </.table>

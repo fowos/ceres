@@ -6,88 +6,51 @@ defmodule Ceres.TitlesTest do
   describe "titles" do
     alias Ceres.Titles.Title
 
-    import Ceres.AccountsFixtures, only: [user_scope_fixture: 0]
     import Ceres.TitlesFixtures
 
-    @invalid_attrs %{type: nil, original_name: nil}
+    @invalid_attrs %{type: :avava, original_name: nil}
 
-    test "list_titles/1 returns all scoped titles" do
-      scope = user_scope_fixture()
-      other_scope = user_scope_fixture()
-      title = title_fixture(scope)
-      other_title = title_fixture(other_scope)
-      assert Titles.list_titles(scope) == [title]
-      assert Titles.list_titles(other_scope) == [other_title]
-    end
-
-    test "get_title!/2 returns the title with given id" do
-      scope = user_scope_fixture()
-      title = title_fixture(scope)
-      other_scope = user_scope_fixture()
-      assert Titles.get_title!(scope, title.id) == title
-      assert_raise Ecto.NoResultsError, fn -> Titles.get_title!(other_scope, title.id) end
+    test "get_title!/1 returns the title with given id" do
+      title = title_fixture()
+      assert Titles.get_title!(title.id) == title
     end
 
     test "create_title/2 with valid data creates a title" do
-      valid_attrs = %{type: 42, original_name: "some original_name"}
-      scope = user_scope_fixture()
+      valid_attrs = %{type: :manga, original_name: "some original_name"}
 
-      assert {:ok, %Title{} = title} = Titles.create_title(scope, valid_attrs)
-      assert title.type == 42
+      assert {:ok, %Title{} = title} = Titles.create_title(valid_attrs)
+      assert title.type == :manga
       assert title.original_name == "some original_name"
-      assert title.user_id == scope.user.id
     end
 
     test "create_title/2 with invalid data returns error changeset" do
-      scope = user_scope_fixture()
-      assert {:error, %Ecto.Changeset{}} = Titles.create_title(scope, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Titles.create_title(@invalid_attrs)
     end
 
     test "update_title/3 with valid data updates the title" do
-      scope = user_scope_fixture()
-      title = title_fixture(scope)
-      update_attrs = %{type: 43, original_name: "some updated original_name"}
+      title = title_fixture()
+      update_attrs = %{type: :comic, original_name: "some updated original_name"}
 
-      assert {:ok, %Title{} = title} = Titles.update_title(scope, title, update_attrs)
-      assert title.type == 43
+      assert {:ok, %Title{} = title} = Titles.update_title(title, update_attrs)
+      assert title.type == :comic
       assert title.original_name == "some updated original_name"
     end
 
-    test "update_title/3 with invalid scope raises" do
-      scope = user_scope_fixture()
-      other_scope = user_scope_fixture()
-      title = title_fixture(scope)
-
-      assert_raise MatchError, fn ->
-        Titles.update_title(other_scope, title, %{})
-      end
-    end
-
     test "update_title/3 with invalid data returns error changeset" do
-      scope = user_scope_fixture()
-      title = title_fixture(scope)
-      assert {:error, %Ecto.Changeset{}} = Titles.update_title(scope, title, @invalid_attrs)
-      assert title == Titles.get_title!(scope, title.id)
+      title = title_fixture()
+      assert {:error, %Ecto.Changeset{}} = Titles.update_title(title, @invalid_attrs)
+      assert title == Titles.get_title!(title.id)
     end
 
     test "delete_title/2 deletes the title" do
-      scope = user_scope_fixture()
-      title = title_fixture(scope)
-      assert {:ok, %Title{}} = Titles.delete_title(scope, title)
-      assert_raise Ecto.NoResultsError, fn -> Titles.get_title!(scope, title.id) end
-    end
-
-    test "delete_title/2 with invalid scope raises" do
-      scope = user_scope_fixture()
-      other_scope = user_scope_fixture()
-      title = title_fixture(scope)
-      assert_raise MatchError, fn -> Titles.delete_title(other_scope, title) end
+      title = title_fixture()
+      assert {:ok, %Title{}} = Titles.delete_title(title)
+      assert_raise Ecto.NoResultsError, fn -> Titles.get_title!(title.id) end
     end
 
     test "change_title/2 returns a title changeset" do
-      scope = user_scope_fixture()
-      title = title_fixture(scope)
-      assert %Ecto.Changeset{} = Titles.change_title(scope, title)
+      title = title_fixture()
+      assert %Ecto.Changeset{} = Titles.change_title(title)
     end
   end
 
@@ -109,13 +72,12 @@ defmodule Ceres.TitlesTest do
     end
 
     test "create_comic/1 with valid data creates a comic" do
-      valid_attrs = %{name: "some name", description: "some description", language: 42, views: 42}
+      valid_attrs = %{name: "some name", description: "some description", language: :ru, title_id: title_fixture().id}
 
       assert {:ok, %Comic{} = comic} = Titles.create_comic(valid_attrs)
       assert comic.name == "some name"
       assert comic.description == "some description"
-      assert comic.language == 42
-      assert comic.views == 42
+      assert comic.language == :ru
     end
 
     test "create_comic/1 with invalid data returns error changeset" do
@@ -124,13 +86,12 @@ defmodule Ceres.TitlesTest do
 
     test "update_comic/2 with valid data updates the comic" do
       comic = comic_fixture()
-      update_attrs = %{name: "some updated name", description: "some updated description", language: 43, views: 43}
+      update_attrs = %{name: "some updated name", description: "some updated description", language: :jp, title_id: title_fixture().id}
 
       assert {:ok, %Comic{} = comic} = Titles.update_comic(comic, update_attrs)
       assert comic.name == "some updated name"
       assert comic.description == "some updated description"
-      assert comic.language == 43
-      assert comic.views == 43
+      assert comic.language == :jp
     end
 
     test "update_comic/2 with invalid data returns error changeset" do
@@ -169,7 +130,7 @@ defmodule Ceres.TitlesTest do
     end
 
     test "create_chapter/1 with valid data creates a chapter" do
-      valid_attrs = %{number: 42, volume: 42}
+      valid_attrs = %{number: 42, volume: 42, comic_id: comic_fixture().id}
 
       assert {:ok, %Chapter{} = chapter} = Titles.create_chapter(valid_attrs)
       assert chapter.number == 42
@@ -225,11 +186,16 @@ defmodule Ceres.TitlesTest do
     end
 
     test "create_page/1 with valid data creates a page" do
-      valid_attrs = %{number: 42, source: "some source"}
+      chapter = chapter_fixture()
+      valid_attrs = %{number: 42, source: "some source", chapter_id: chapter.id}
 
       assert {:ok, %Page{} = page} = Titles.create_page(valid_attrs)
+      page = page
+      |> Repo.preload(:chapter)
+
       assert page.number == 42
       assert page.source == "some source"
+      assert page.chapter == chapter
     end
 
     test "create_page/1 with invalid data returns error changeset" do
@@ -281,10 +247,13 @@ defmodule Ceres.TitlesTest do
     end
 
     test "create_cover/1 with valid data creates a cover" do
-      valid_attrs = %{source: "some source"}
+      comic = comic_fixture()
+      valid_attrs = %{source: "some source", comic_id: comic.id}
 
       assert {:ok, %Cover{} = cover} = Titles.create_cover(valid_attrs)
+      cover = Repo.preload(cover, :comic)
       assert cover.source == "some source"
+      assert cover.comic == comic
     end
 
     test "create_cover/1 with invalid data returns error changeset" do

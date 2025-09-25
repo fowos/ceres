@@ -110,6 +110,8 @@ defmodule CeresWeb.Router do
 
     put "/localizers", Api.Localizers.LocalizersController, :create
 
+    put "/covers", Api.Covers.CoversController, :upload
+
     put "/tags", Api.Tags.TagsController, :create
   end
 

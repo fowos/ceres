@@ -12,14 +12,14 @@ defmodule Ceres.TitlesFixtures do
   @doc """
   Generate a title.
   """
-  def title_fixture(scope, attrs \\ %{}) do
+  def title_fixture(attrs \\ %{}) do
     attrs =
       Enum.into(attrs, %{
         original_name: unique_title_original_name(),
-        type: 42
+        type: :manga
       })
 
-    {:ok, title} = Ceres.Titles.create_title(scope, attrs)
+    {:ok, title} = Ceres.Titles.create_title(attrs)
     title
   end
 
@@ -31,9 +31,9 @@ defmodule Ceres.TitlesFixtures do
       attrs
       |> Enum.into(%{
         description: "some description",
-        language: 42,
+        language: :en,
         name: "some name",
-        views: 42
+        title_id: attrs[:title_id] || title_fixture().id
       })
       |> Ceres.Titles.create_comic()
 
@@ -47,8 +47,9 @@ defmodule Ceres.TitlesFixtures do
     {:ok, chapter} =
       attrs
       |> Enum.into(%{
-        number: 42,
-        volume: 42
+        comic_id: attrs[:comic_id] || comic_fixture().id,
+        number: attrs[:number] || 42,
+        volume: attrs[:volume] || 42
       })
       |> Ceres.Titles.create_chapter()
 
@@ -62,8 +63,9 @@ defmodule Ceres.TitlesFixtures do
     {:ok, page} =
       attrs
       |> Enum.into(%{
-        number: 42,
-        source: "some source"
+        chapter_id: attrs[:chapter_id] || chapter_fixture().id,
+        number: attrs[:number] || 42,
+        source: attrs[:source] || "some source"
       })
       |> Ceres.Titles.create_page()
 
@@ -77,6 +79,7 @@ defmodule Ceres.TitlesFixtures do
     {:ok, cover} =
       attrs
       |> Enum.into(%{
+        comic_id: attrs[:comic_id] || comic_fixture().id,
         source: "some source"
       })
       |> Ceres.Titles.create_cover()

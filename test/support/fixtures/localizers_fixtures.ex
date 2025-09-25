@@ -3,6 +3,7 @@ defmodule Ceres.LocalizersFixtures do
   This module defines test helpers for creating
   entities via the `Ceres.Localizers` context.
   """
+alias Ceres.TitlesFixtures
 
   @doc """
   Generate a localizer.
@@ -26,7 +27,8 @@ defmodule Ceres.LocalizersFixtures do
     {:ok, localizers_comics} =
       attrs
       |> Enum.into(%{
-
+        localizer_id: localizer_fixture().id,
+        comic_id: TitlesFixtures.comic_fixture().id
       })
       |> Ceres.Localizers.create_localizers_comics()
 

@@ -1,4 +1,5 @@
 defmodule Ceres.LocalizersTest do
+alias Ceres.TitlesFixtures
   use Ceres.DataCase
 
   alias Ceres.Localizers
@@ -64,7 +65,9 @@ defmodule Ceres.LocalizersTest do
 
     import Ceres.LocalizersFixtures
 
-    @invalid_attrs %{}
+    @invalid_attrs %{comic_id: Ecto.UUID.generate(), localizer_id: Ecto.UUID.generate()}
+    @invalid_attrs2 %{localizer_id: Ecto.UUID.generate()}
+    @invalid_attrs3 %{comic_id: Ecto.UUID.generate()}
 
     test "list_localizers_comics/0 returns all localizers_comics" do
       localizers_comics = localizers_comics_fixture()
@@ -77,7 +80,11 @@ defmodule Ceres.LocalizersTest do
     end
 
     test "create_localizers_comics/1 with valid data creates a localizers_comics" do
-      valid_attrs = %{}
+      title = TitlesFixtures.title_fixture()
+      comic = TitlesFixtures.comic_fixture(%{title_id: title.id})
+      local = localizer_fixture()
+
+      valid_attrs = %{title_id: title.id, comic_id: comic.id, localizer_id: local.id}
 
       assert {:ok, %LocalizersComics{} = localizers_comics} = Localizers.create_localizers_comics(valid_attrs)
     end
@@ -96,6 +103,9 @@ defmodule Ceres.LocalizersTest do
     test "update_localizers_comics/2 with invalid data returns error changeset" do
       localizers_comics = localizers_comics_fixture()
       assert {:error, %Ecto.Changeset{}} = Localizers.update_localizers_comics(localizers_comics, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Localizers.update_localizers_comics(localizers_comics, @invalid_attrs2)
+      assert {:error, %Ecto.Changeset{}} = Localizers.update_localizers_comics(localizers_comics, @invalid_attrs3)
+
       assert localizers_comics == Localizers.get_localizers_comics!(localizers_comics.id)
     end
 

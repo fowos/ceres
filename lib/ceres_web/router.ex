@@ -24,25 +24,6 @@ defmodule CeresWeb.Router do
 
     get "/", PageController, :home
   end
-
-  # Other scopes may use custom stacks.
-  scope "/api", CeresWeb do
-    pipe_through :api
-
-    get "/image/*key", Api.Images.ImageController, :download
-
-    get "/titles/:name", Api.Titles.TitlesController, :show
-
-    get "/comics/:name", Api.Comics.ComicsController, :index
-    get "/comics", Api.Comics.ComicsController, :index
-    post "/comics", Api.Comics.ComicsController, :by_params
-
-
-    get "/pages/:id", Api.Pages.PagesController, :index
-
-    get "/tags", Api.Tags.TagsController, :index
-  end
-
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:ceres, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
@@ -90,16 +71,44 @@ defmodule CeresWeb.Router do
     post "/users/update-password", UserSessionController, :update_password
   end
 
+    # Other scopes may use custom stacks.
+  scope "/api", CeresWeb do
+    pipe_through :api
+
+    get "/image/*key", Api.Images.ImageController, :download
+
+    get "/titles/:name", Api.Titles.TitlesController, :show
+
+    get "/comics/:name", Api.Comics.ComicsController, :index
+    get "/comics", Api.Comics.ComicsController, :index
+    post "/comics", Api.Comics.ComicsController, :by_params
+
+    get "/authors", Api.Authors.AuthorsController, :index
+
+    get "/publishers", Api.Publishers.PublishersController, :index
+
+    get "/localizers", Api.Localizers.LocalizersController, :index
+
+    get "/pages/:id", Api.Pages.PagesController, :index
+
+    get "/tags", Api.Tags.TagsController, :index
+  end
+
   scope "/api", CeresWeb do
     pipe_through :api
     # TODO: auth for api, Phoenix.Token
 
-    get "/titles/:name", Api.Titles.TitlesController, :show
     put "/titles", Api.Titles.TitlesController, :create
 
     put "/chapters/upload", Api.Chapters.ChaptersController, :upload
 
     put "/comics", Api.Comics.ComicsController, :create
+
+    put "/authors", Api.Authors.AuthorsController, :create
+
+    put "/publishers", Api.Publishers.PublishersController, :create
+
+    put "/localizers", Api.Localizers.LocalizersController, :create
 
     put "/tags", Api.Tags.TagsController, :create
   end

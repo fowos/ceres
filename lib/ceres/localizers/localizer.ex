@@ -8,8 +8,8 @@ defmodule Ceres.Localizers.Localizer do
     field :name, :string
     field :description, :string
 
-    has_many :localizers_titles, Ceres.Localizers.LocalizersTitles
-    has_many :titles, through: [:localizers_titles, :comic]
+    has_many :localizers_comics, Ceres.Localizers.LocalizersComics
+    has_many :titles, through: [:localizers_comics, :comic]
 
     timestamps(type: :utc_datetime)
   end

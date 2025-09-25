@@ -11,14 +11,23 @@ defmodule Ceres.Authors do
   @doc """
   Returns the list of authors.
 
+  Options:
+    :offset
+    :limit
+
   ## Examples
 
-      iex> list_authors()
-      [%Author{}, ...]
+      iex> list_authors(opts \\\\ [])
+      [%Author{} | term(), ...]
 
   """
-  def list_authors do
-    Repo.all(Author)
+  def list_authors(opts \\ []) do
+    offset = Keyword.get(opts, :offset, 0)
+    limit = Keyword.get(opts, :limit, 100)
+
+    query = from a in Author, limit: ^limit, offset: ^offset
+
+    Repo.all(query)
   end
 
   @doc """
@@ -36,6 +45,18 @@ defmodule Ceres.Authors do
 
   """
   def get_author!(id), do: Repo.get!(Author, id)
+
+  @doc """
+  Gets a single author by name.
+
+  ## Examples
+
+      iex> get_author_by_name("John Doe")
+      %Author{} | term() | nil
+  """
+  def get_author_by_name(name) do
+    Repo.get_by(Author, name: name)
+  end
 
   @doc """
   Creates a author.
@@ -107,14 +128,23 @@ defmodule Ceres.Authors do
   @doc """
   Returns the list of publishers.
 
+  Options:
+    :offset
+    :limit
+
   ## Examples
 
-      iex> list_publishers()
-      [%Publisher{}, ...]
+      iex> list_publishers(opts \\\\ [])
+      [%Publisher{} | term(), ...]
 
   """
-  def list_publishers do
-    Repo.all(Publisher)
+  def list_publishers(opts \\ []) do
+    offset = Keyword.get(opts, :offset, 0)
+    limit = Keyword.get(opts, :limit, 100)
+
+    query = from p in Publisher, limit: ^limit, offset: ^offset
+
+    Repo.all(query)
   end
 
   @doc """
@@ -132,6 +162,19 @@ defmodule Ceres.Authors do
 
   """
   def get_publisher!(id), do: Repo.get!(Publisher, id)
+
+
+  @doc """
+  Gets a single publisher by name.
+
+  ## Examples
+
+      iex> get_publisher_by_name("John Doe")
+      %Publisher{} | term() | nil
+  """
+  def get_publisher_by_name(name) do
+    Repo.get_by(Publisher, name: name)
+  end
 
   @doc """
   Creates a publisher.
@@ -424,11 +467,12 @@ defmodule Ceres.Authors do
     Repo.all(query)
   end
 
-  def get_publishers_by_name(name) do
+  def get_publishers_by_part_name(name) do
     query = from p in Publisher,
             where: ilike(p.name, ^"%#{name}%")
     Repo.all(query)
   end
+
 
   def delete_publishers_titles_by_title_id(title_id, publisher_id) do
     from(at in PublishersTitles, where: at.title_id == ^title_id and at.publisher_id == ^publisher_id)

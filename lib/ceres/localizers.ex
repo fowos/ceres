@@ -11,14 +11,23 @@ defmodule Ceres.Localizers do
   @doc """
   Returns the list of localizers.
 
+  ## Options
+
+    * `:offset` - The offset for pagination.
+    * `:limit` - The limit for pagination.
+
   ## Examples
 
-      iex> list_localizers()
-      [%Localizer{}, ...]
+      iex> list_localizers(opts \\\\ [])
+      [%Localizer{} | term(), ...]
 
   """
-  def list_localizers do
-    Repo.all(Localizer)
+  def list_localizers(opts \\ []) do
+    offset = Keyword.get(opts, :offset, 0)
+    limit = Keyword.get(opts, :limit, 100)
+
+    query = from l in Localizer, limit: ^limit, offset: ^offset
+    Repo.all(query)
   end
 
   @doc """
@@ -36,6 +45,18 @@ defmodule Ceres.Localizers do
 
   """
   def get_localizer!(id), do: Repo.get!(Localizer, id)
+
+  @doc """
+  Gets a single localizer by name.
+
+  ## Examples
+
+      iex> get_localizer_by_name("some name")
+      %Localizer{} | term() | nil
+  """
+  def get_localizer_by_name(name) do
+    Repo.get_by(Localizer, name: name)
+  end
 
   @doc """
   Creates a localizer.

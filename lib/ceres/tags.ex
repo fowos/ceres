@@ -254,6 +254,14 @@ defmodule Ceres.Tags do
     Repo.one(query)
   end
 
+  @doc """
+  Get titles_tags by ids
+
+  ## Examples
+
+      iex> get_titles_tags_by_ids("uuid-...", "uuid-...)
+      %TitlesTags{} | term() | nil
+  """
   def get_titles_tags_by_ids(title_id, tag_id) do
     query = from t in TitlesTags, where: t.title_id == ^title_id, where: t.tag_id == ^tag_id
     Repo.one(query)

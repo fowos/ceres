@@ -57,6 +57,11 @@ alias Ceres.TitlesFixtures
       tag = tag_fixture()
       assert %Ecto.Changeset{} = Tags.change_tag(tag)
     end
+
+    test "get_tag_by_name/1 returns the tag" do
+      tag = tag_fixture()
+      assert tag == Tags.get_tag_by_name(tag.name)
+    end
   end
 
   describe "titles_tags" do
@@ -115,6 +120,11 @@ alias Ceres.TitlesFixtures
     test "change_titles_tags/1 returns a titles_tags changeset" do
       titles_tags = titles_tags_fixture()
       assert %Ecto.Changeset{} = Tags.change_titles_tags(titles_tags)
+    end
+
+    test "get_titles_tags_by_ids/2 returns the title_tags" do
+      title_tags = titles_tags_fixture()
+      assert title_tags == Tags.get_titles_tags_by_ids(title_tags.title_id, title_tags.tag_id)
     end
   end
 end

@@ -3,58 +3,47 @@ defmodule CeresWeb.Components.NavbarLive do
   use CeresWeb, :verified_routes
   use CeresWeb, :html
 
+  @pages [
+    {"Titles", "hero-queue-list", "titles"},
+    {"Comics", "hero-document", "comics"},
+    {"Tags", "hero-tag", "tags"}
+  ]
 
   def render(assigns) do
-    # IO.inspect(pages, label: "PAGES IN NAVBAR")
+
+    assigns = %{
+      pages: @pages
+    }
     ~H"""
-    <div class="p-4 bg-base-200 w-full md:min-w-60 rounded-lg border-base-300 border-1 mx-auto">
-      <div class="flex flex-row rounded-lg bg-base-300">
-        <img src={~p"/images/logo.png"} alt="ceres logo" class="w-16 h-auto" />
-        <p class="font-bold my-auto text-base-content">Ceres</p>
-      </div>
+    <div class="bg-base-100 w-full md:min-w-50 rounded-lg mx-auto">
+      <div class="static md:sticky md:top-4 self-start h-fit">
 
-      <div class="divider"></div>
+        <.link
+          navigate={~p"/"}
+          class="group flex flex-row gap-4 rounded-lg shadow-lg bg-base-200 p-2"
+        >
+          <img src={~p"/images/logo.png"} alt="ceres logo" class="w-8 h-auto transition-transform duration-600 group-hover:rotate-[360deg]" />
+          <p class="font-bold my-auto text-base-content group-hover:text-primary duration-300">Ceres</p>
+        </.link>
 
-      <div class="font-medium flex flex-col gap-2 mx-auto w-full">
-        <div class="text-base-content hover:text-primary duration-300">
-          <.link
-            class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
-            navigate={~p"/"}
-          >
-            <.icon name="hero-home" class="size-6 me-2" />
-            Home
-          </.link>
+        <%!-- <div class="divider"></div> --%>
+
+        <div class="font-medium flex flex-col gap-2 mx-auto w-full mt-4">
+
+          <%= for {name, icon, path} <- @pages do%>
+            <.link
+              class="whitespace-nowrap text-base-content hover:text-primary duration-300 w-full bg-base-200 p-2 rounded-lg"
+              navigate={~p"/#{path}"}
+            >
+              <.icon name={icon} class="size-6 me-2" />
+              {name}
+            </.link>
+
+          <% end %>
+
         </div>
 
-        <div class="text-base-content hover:text-primary duration-300">
-          <.link
-            class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
-            navigate={~p"/titles"}
-          >
-            <.icon name="hero-queue-list" class="size-6 me-2" />
-            Titles
-          </.link>
-        </div>
-
-        <div class="text-base-content hover:text-primary duration-300">
-          <.link
-            class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
-            navigate={~p"/comics"}
-          >
-            <.icon name="hero-document" class="size-6 me-2" />
-            Comics
-          </.link>
-        </div>
-
-        <div class="text-base-content hover:text-primary duration-300">
-          <.link
-            class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
-            navigate={~p"/tags"}
-          >
-            <.icon name="hero-tag" class="size-6 me-2" />
-            Tags
-          </.link>
-        </div>
+        <%!-- <div class="divider"></div> --%>
       </div>
     </div>
     """

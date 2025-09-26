@@ -93,6 +93,7 @@ alias Ceres.TitlesFixtures
 
     test "create_titles_tags/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Tags.create_titles_tags(@invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Tags.create_titles_tags(@invalid_attrs2)
     end
 
     test "update_titles_tags/2 with valid data updates the titles_tags" do

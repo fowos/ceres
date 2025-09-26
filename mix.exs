@@ -5,7 +5,7 @@ defmodule Ceres.MixProject do
     [
       app: :ceres,
       version: "0.1.1",
-      elixir: "~> 1.18",
+      elixir: "~> 1.18.4",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),

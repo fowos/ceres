@@ -110,6 +110,12 @@ defmodule Ceres.TitlesTest do
       comic = comic_fixture()
       assert %Ecto.Changeset{} = Titles.change_comic(comic)
     end
+
+    test "count_comics/0 returns the total number of comics" do
+      comic_fixture()
+      comic_fixture()
+      assert Titles.count_comics() == 2
+    end
   end
 
   describe "chapters" do

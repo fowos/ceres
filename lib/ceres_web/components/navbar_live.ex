@@ -19,6 +19,16 @@ defmodule CeresWeb.Components.NavbarLive do
         <div class="text-base-content hover:text-primary duration-300">
           <.link
             class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
+            navigate={~p"/"}
+          >
+            <.icon name="hero-home" class="size-6 me-2" />
+            Home
+          </.link>
+        </div>
+
+        <div class="text-base-content hover:text-primary duration-300">
+          <.link
+            class="whitespace-nowrap flex w-full border-1 p-2 border-base-100 rounded-lg"
             navigate={~p"/titles"}
           >
             <.icon name="hero-queue-list" class="size-6 me-2" />

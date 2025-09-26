@@ -36,15 +36,8 @@ defmodule CeresWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-end flex h-16 w-full items-center justify-end space-x-4">
-        <ul class="flex flex-col px-1 space-x-4 items-center">
-          <li>
-            <.theme_toggle />
-          </li>
-        </ul>
-      </div>
-    </header>
+    <div class="w-full mt-8">
+
 
     <main class="flex gap-4 flex-col md:flex-row mx-auto px-4 sm:px-6 lg:px-6">
       <div class="flex w-auto">
@@ -55,6 +48,7 @@ defmodule CeresWeb.Layouts do
       </div>
     </main>
     <.flash_group flash={@flash} />
+    </div>
     """
   end
 

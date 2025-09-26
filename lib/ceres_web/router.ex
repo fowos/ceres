@@ -22,8 +22,9 @@ defmodule CeresWeb.Router do
   scope "/", CeresWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    # get "/", PageController, :home
   end
+
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:ceres, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
@@ -50,6 +51,8 @@ defmodule CeresWeb.Router do
       on_mount: [{CeresWeb.UserAuth, :require_authenticated}] do
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+
+      live "/", Home.Home, :index
 
       live "/titles", TitlesList.TitlesListLive, :index
       live "/titles/new", TitlesList.Form, :new

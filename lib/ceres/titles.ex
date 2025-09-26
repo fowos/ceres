@@ -170,6 +170,13 @@ defmodule Ceres.Titles do
   end
 
   @doc """
+  Returns the total number of comics
+  """
+  def count_comics do
+    Repo.aggregate(Comic, :count, :id)
+  end
+
+  @doc """
   Gets a single comic.
 
   Raises `Ecto.NoResultsError` if the Comic does not exist.
@@ -376,6 +383,7 @@ defmodule Ceres.Titles do
   def list_pages do
     Repo.all(Page)
   end
+
 
   @doc """
   Gets a single page.

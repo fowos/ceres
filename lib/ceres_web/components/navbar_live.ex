@@ -20,7 +20,7 @@ defmodule CeresWeb.Components.NavbarLive do
 
         <.link
           navigate={~p"/"}
-          class="group flex flex-row gap-4 rounded-lg shadow-lg bg-base-200 p-2"
+          class="group flex flex-row gap-4 rounded-lg bg-base-200 p-2"
         >
           <img src={~p"/images/logo.png"} alt="ceres logo" class="w-8 h-auto transition-transform duration-600 group-hover:rotate-[360deg]" />
           <p class="font-bold my-auto text-base-content group-hover:text-primary duration-300">Ceres</p>

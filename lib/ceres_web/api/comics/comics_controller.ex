@@ -61,11 +61,17 @@ defmodule CeresWeb.Api.Comics.ComicsController do
   end
 
   def by_params(conn, params) do
+    offset = Map.get(params, "offset", 0)
+    limit = Map.get(params, "limit", @page_size)
+
     comics = Title
     |> search_by_tags(params["tags"])
     |> search_by_publishers(params["publishers"])
     |> search_by_authors(params["authors"])
+    |> offset(^offset)
+    |> limit(^limit)
     |> Repo.all()
+    |> IO.inspect(label: "comics")
     |> Repo.preload([comics: [:localizers, :chapters, :cover, title: [:authors, :publishers, :tags]]])
     |> Enum.map(fn title -> title.comics end)
     |> Enum.reduce([], fn comics, acc -> comics ++ acc end)

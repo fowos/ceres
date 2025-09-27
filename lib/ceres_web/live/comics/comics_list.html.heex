@@ -15,6 +15,41 @@
       </:actions>
     </.header>
 
+
+    <%!-- maybe in future... --%>
+    <%!-- <div class="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] md:grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-4">
+      <%= for {dom_id, comic} <- @streams.comics do %>
+
+        <div id={dom_id} class="card bg-base-100 image-full w-40 h-70 md:w-55 md:h-90 shadow-sm mx-auto">
+          <figure>
+            <%= if comic.cover do %>
+              <figure class="w-full relative h-90">
+                <image class="w-full h-full object-cover" src={~p"/api/image/#{comic.cover.source}"}/>
+              </figure>
+            <% else %>
+              <div class="skeleton w-60 h-90 flex items-center justify-center font-semibold"></div>
+            <% end %>
+          </figure>
+          <div class="card-body px-1 py-2 flex flex-col gap-2 justify-between">
+            <div>
+              <p>{comic.name}</p>
+            </div>
+            <div class="flex justify-between">
+              <span class="bg-base-100/50 px-2 py-1 rounded-md text-base-content font-semibold">{lang_atom_to_string(comic.language)}</span>
+              <span class="bg-base-100/50 px-2 py-1 rounded-md text-base-content font-semibold">
+                <.icon name="hero-document"/>
+                {Enum.count(comic.chapters)}
+              </span>
+            </div>
+          </div>
+        </div>
+       <div id="infinite-scroll" phx-hook="InfiniteScroll"></div>
+      <% end %>
+    </div> --%>
+
+
+
+
     <div class="overflow-x-auto">
       <.table
         id="titles"
@@ -50,6 +85,7 @@
       </.table>
       <div id="infinite-scroll" phx-hook="InfiniteScroll"></div>
     </div>
+
 
   </div>
 </Layouts.app>

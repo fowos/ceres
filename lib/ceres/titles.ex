@@ -502,8 +502,15 @@ defmodule Ceres.Titles do
       iex> get_titles_list_by_part_name(partname)
       [%Title{} | term()]
   """
-  def get_titles_list_by_part_name(partname, preloads \\ []) do
-    Repo.all(from c in Title, where: ilike(c.original_name, ^"%#{partname}%"), preload: ^preloads)
+  def get_titles_list_by_part_name(partname, opts \\ []) do
+    offset = Keyword.get(opts, :offset, 0)
+    limit = Keyword.get(opts, :limit, 50)
+
+    Repo.all(
+      from c in Title,
+      where: ilike(c.original_name, ^"%#{partname}%"),
+      offset: ^offset,
+      limit: ^limit)
   end
 
   alias Ceres.Titles.Cover

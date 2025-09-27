@@ -18,10 +18,14 @@ defmodule CeresWeb.Api.Comics.ComicsController do
   @doc """
   Finc comics by part name
   """
-  def index(conn, %{"name" => name}) do
+  def index(conn, %{"name" => name} = params) do
+    offset = Map.get(params, "offset", "0") |> String.to_integer()
+    limit = Map.get(params, "limit", "#{@page_size}") |> String.to_integer()
+
+
     comics = Titles.get_comics_list_by_part_name(name, [:localizers, :chapters])
 
-    titles_comics = Titles.get_titles_list_by_part_name(name, [comics: [:localizers, :chapters]])
+    titles_comics = Titles.get_titles_list_by_part_name(name, offset: offset, limit: limit) |> Repo.preload([comics: [:localizers, :chapters]])
     |> Enum.map(fn title -> title.comics end)
     |> Enum.reduce(comics, fn comics, acc -> comics ++ acc end)
 

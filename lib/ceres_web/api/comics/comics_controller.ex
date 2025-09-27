@@ -56,8 +56,6 @@ defmodule CeresWeb.Api.Comics.ComicsController do
       true -> tmp_limit
     end
 
-    IO.inspect(limit, label: "limit")
-
     comics = Titles.list_comics(limit: limit, offset: offset)
     |> Repo.preload([:localizers, :chapters, :cover, title: [:authors, :publishers, :tags]])
 
@@ -75,7 +73,7 @@ defmodule CeresWeb.Api.Comics.ComicsController do
     |> search_by_tags(params["tags"])
     |> search_by_publishers(params["publishers"])
     |> search_by_authors(params["authors"])
-    |> order_by([_t, c], [{^sort_order, field(c, ^sort_field)}])
+    |> order_by([_t, c], [{^sort_order, ^sort_field}])
     |> offset(^offset)
     |> limit(^limit)
     |> Repo.all()

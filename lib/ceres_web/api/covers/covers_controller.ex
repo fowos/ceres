@@ -10,10 +10,6 @@ defmodule CeresWeb.Api.Covers.CoversController do
     "file" => %Plug.Upload{} = upload,
     "comic_id" => comic_id
   }) do
-    # tmp = Converter.generate_tmpdir()
-    # File.mkdir_p!(tmp)
-
-    # filepath = Path.join(tmp, upload.filename)
     case save_cover(upload.path, comic_id) do
       :ok ->
         conn

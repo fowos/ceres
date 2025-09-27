@@ -67,11 +67,15 @@ defmodule CeresWeb.Api.Comics.ComicsController do
   def by_params(conn, params) do
     offset = Map.get(params, "offset", 0)
     limit = Map.get(params, "limit", @page_size)
+    sort_field = Map.get(params, "sort_field", "inserted_at") |> String.to_existing_atom()
+    sort_order = Map.get(params, "sort_order", "desc") |> String.to_existing_atom()
 
     comics = Title
+    |> join(:inner, [t], c in assoc(t, :comics))
     |> search_by_tags(params["tags"])
     |> search_by_publishers(params["publishers"])
     |> search_by_authors(params["authors"])
+    |> order_by([_t, c], [{^sort_order, field(c, ^sort_field)}])
     |> offset(^offset)
     |> limit(^limit)
     |> Repo.all()

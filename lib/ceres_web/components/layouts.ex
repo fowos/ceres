@@ -37,13 +37,13 @@ defmodule CeresWeb.Layouts do
   def app(assigns) do
     ~H"""
     <div class="w-full">
-      <main class="flex gap-4 flex-col md:flex-row mx-auto px-4 sm:px-6 lg:px-6">
+      <main class="flex gap-4 flex-col md:flex-row mx-auto px-2 md:px-4">
 
         <div class="flex">
           <.navbar current_scope={@current_scope} />
         </div>
 
-        <div class="mx-auto w-full w-full bg-base-200 p-4 rounded-lg shadow-lg">
+        <div class="mx-auto w-full w-full bg-base-200 p-4 rounded-lg shadow-lg border-1 border-base-300">
           {render_slot(@inner_block)}
         </div>
 
